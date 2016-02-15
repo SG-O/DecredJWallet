@@ -118,8 +118,6 @@ public class getFunds extends JDialog{
         if (amm.startsWith(".")){
             amm = "0" + amm;
         }
-
-        String[] ammSplit = amm.split(".");
         try {
             double out = Double.parseDouble(amm);
             amm = String.format("%.8f",out);
@@ -165,7 +163,7 @@ public class getFunds extends JDialog{
                 exists = false;
                 address = backend.getNewAddress();
                 for (int i = 0; i < addressSelect.getItemCount(); i++) {
-                    if (address.equals((String) addressSelect.getItemAt(i))) {
+                    if (address.equals(addressSelect.getItemAt(i))) {
                         exists = true;
                         break;
                     }
