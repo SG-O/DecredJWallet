@@ -87,8 +87,8 @@ public class TransactionGui extends JDialog{
         this.id.setText(t.getID());
         this.block.setText(t.getBlock());
         this.address.setText(t.getAddress());
-        this.ammount.setText(String.format("%.8f", fixedPoint.longToCoin(t.getAmount())));
-        this.fee.setText(String.format("%.8f", fixedPoint.longToCoin(t.getFee())));
+        this.ammount.setText(t.getAmount().toString());
+        this.fee.setText(t.getFee().toString());
         this.confirmations.setText(String.valueOf(t.getConfirmations()));
         this.category.setText(t.getCategory());
         this.comment.setText(t.getComment());

@@ -5,11 +5,9 @@
  */
 
 import org.apache.commons.lang3.SystemUtils;
-import org.codehaus.groovy.ast.expr.FieldExpression;
-import update.*;
+import update.update;
 
 import java.io.File;
-import java.nio.file.Files;
 
 /**
  * Decred Util: Created by Joerg Bayer (admin@sg-o.de) on 28.01.2016.
@@ -108,7 +106,12 @@ public class main {
             set.connect();
         }
         startScreen.setProgress(0.66f);
-        while (settings.getBackend().getBalance() < 0){ //Wait for the wallet to load.
+        while (true) { //Wait for the wallet to load.
+            try {
+                settings.getBackend().getBalance();
+                break;
+            } catch (status e) {
+            }
             try {
                 i++;
                 Thread.sleep(100);
@@ -125,7 +128,10 @@ public class main {
 
         MainWindow window = new MainWindow(set);
         window.setVisible(true);
-        ((transactionTableModel)window.tableModel).changeData(settings.getBackend().listTransactions(set.getTransactionsToLoad()));
+        try {
+            ((transactionTableModel) window.tableModel).changeData(settings.getBackend().listTransactions(set.getTransactionsToLoad()));
+        } catch (status status) {
+        }
 
         while (window.isVisible()){ //In the future there might be some background tasks we want to perform here but for the moment, we do nothing.
             try {

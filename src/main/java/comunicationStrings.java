@@ -24,8 +24,8 @@ public class comunicationStrings {
         return "{\"method\":\"walletpassphrase\",\"params\":[\"" + key + "\"," + time + "],\"id\":"+index+"}";
     }
 
-    public static String SENDTO(String address, long ammount){
-        return "{\"method\":\"sendtoaddress\",\"params\":[\"" + address + "\"," + fixedPoint.longToCoin(ammount) + "],\"id\":"+index+"}";
+    public static String SENDTO(String address, Coin amount) {
+        return "{\"method\":\"sendtoaddress\",\"params\":[\"" + address + "\"," + amount + "],\"id\":" + index + "}";
     }
 
     public static String GETADDRESSES(String account){
@@ -33,8 +33,8 @@ public class comunicationStrings {
     }
 
 
-    public static String SETTXFEE(long ammount){
-        return "{\"method\":\"settxfee\",\"params\":[" + fixedPoint.longToCoin(ammount) + "],\"id\":"+index+"}";
+    public static String SETTXFEE(Coin amount) {
+        return "{\"method\":\"settxfee\",\"params\":[" + amount + "],\"id\":" + index + "}";
     }
     public static void increaseIndex(){
         index++;

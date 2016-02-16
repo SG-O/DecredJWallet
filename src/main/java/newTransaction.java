@@ -19,7 +19,7 @@ public class newTransaction extends JDialog {
     private JSlider feeSlider;
     private JLabel feeValue;
 
-    private long baseUnit = 0;
+    private Coin baseUnit;
 
     public newTransaction() {
         setContentPane(contentPane);
@@ -68,9 +68,9 @@ public class newTransaction extends JDialog {
 
     private void onOK() {
 // add your code here
-        long value = 0;
+        Coin value;
         try {
-            value = fixedPoint.coinToLong(Double.parseDouble(this.value.getText()));
+            value = new Coin(this.value.getText());
         } catch (Exception e){
             new Error("Error", "Value cannot be read.");
             return;
@@ -90,8 +90,16 @@ public class newTransaction extends JDialog {
             dispose();
             return;
         }
+        if (baseUnit == null) {
+            new Error("Error", "Can not set TX Fee");
+            dispose();
+            return;
+        }
+
         try {
-            backend.setTxFee(baseUnit *feeSlider.getValue());
+            Coin txFee = new Coin(baseUnit);
+            txFee.mul(feeSlider.getValue());
+            backend.setTxFee(txFee);
             String ID = backend.sendToAddress(addr.getText(), value);
             new Error("Success", "TXID:" + ID);
         } catch (status s){
@@ -101,6 +109,8 @@ public class newTransaction extends JDialog {
             } else{
                 new Error("Error", s.toString());
             }
+        } catch (Exception e) {
+            new Error("Error", e.toString());
         }
         dispose();
     }
@@ -123,7 +133,7 @@ public class newTransaction extends JDialog {
             return;
         }
         try {
-            baseUnit= backend.getRelayFee();
+            baseUnit = backend.getRelayFee();
             updateFeeText();
         } catch (status s){
             new Error("Error", s.toString());
@@ -131,6 +141,12 @@ public class newTransaction extends JDialog {
     }
 
     private void updateFeeText(){
-        feeValue.setText(String.format("%.8f",fixedPoint.longToCoin(baseUnit *feeSlider.getValue())));
+        try {
+            Coin txFee = new Coin(baseUnit);
+            txFee.mul(feeSlider.getValue());
+            feeValue.setText(txFee.toString());
+        } catch (Exception e) {
+        }
+
     }
 }

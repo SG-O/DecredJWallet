@@ -5,25 +5,24 @@
  */
 
 import java.io.*;
-import java.util.Properties;
-import java.util.prefs.Preferences;
 
 /**
  * DecredUtil: Created by Joerg Bayer(admin@sg-o.de) on 31.01.2016.
  */
 public class transaction {
+    private static File setDir;
     private String ID;
     private String block;
     private String address;
-    private long amount;
-    private long fee;
+    private Coin amount;
+    private Coin fee;
     private int confirmations;
     private String category;
     private long time;
     private String comment = "";
 
     //This is the internal representation of a transaction.
-    public transaction(String ID, String block, String address, long amount, long fee, int confirmations, String category, long time) {
+    public transaction(String ID, String block, String address, Coin amount, Coin fee, int confirmations, String category, long time) {
         this.ID = ID;
         this.block = block;
         this.address = address;
@@ -38,7 +37,27 @@ public class transaction {
         this.time = time;
     }
 
-    private static File setDir;
+    /**
+     * Get the directory where the additional information is stored
+     *
+     * @return The directory
+     */
+    public static File getSettingsDirectory() {
+        if (setDir != null) return setDir;
+        String userHome = System.getProperty("user.home");
+        if (userHome == null) {
+            throw new IllegalStateException("user.home==null");
+        }
+        File home = new File(userHome);
+        File settingsDirectory = new File(home, ".decredjwallet");
+        if (!settingsDirectory.exists()) {
+            if (!settingsDirectory.mkdir()) {
+                throw new IllegalStateException(settingsDirectory.toString());
+            }
+        }
+        setDir = settingsDirectory;
+        return settingsDirectory;
+    }
 
     public String getID() {
         return ID;
@@ -48,7 +67,7 @@ public class transaction {
         return block;
     }
 
-    public long getAmount() {
+    public Coin getAmount() {
         return amount;
     }
 
@@ -56,7 +75,7 @@ public class transaction {
         return address;
     }
 
-    public long getFee() {
+    public Coin getFee() {
         return fee;
     }
 
@@ -66,6 +85,10 @@ public class transaction {
 
     public String getCategory() {
         return category;
+    }
+
+    public void setCategory(String category) {
+        this.category = category;
     }
 
     public long getTime() {
@@ -82,10 +105,6 @@ public class transaction {
             saveTransaction();
         } catch (Exception e) {
         }
-    }
-
-    public void setCategory(String category) {
-        this.category = category;
     }
 
     @Override
@@ -120,37 +139,16 @@ public class transaction {
      * Load the comment for the current transaction
      * @throws Exception
      */
-    public void loadTransaction() throws Exception{
+    public void loadTransaction() throws Exception {
         File setFile = new File(getSettingsDirectory(), ID + ".prop");
         if (!setFile.exists()) return;
         if (!setFile.canRead()) return;
         BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(setFile), "UTF-8"));
         String line;
         StringBuilder prop = new StringBuilder();
-        while( (line = br.readLine()) != null) {
+        while ((line = br.readLine()) != null) {
             prop.append(line);
         }
         this.comment = prop.toString();
-    }
-
-    /**
-     * Get the directory where the additional information is stored
-     * @return The directory
-     */
-    public static File getSettingsDirectory() {
-        if (setDir != null) return setDir;
-        String userHome = System.getProperty("user.home");
-        if(userHome == null) {
-            throw new IllegalStateException("user.home==null");
-        }
-        File home = new File(userHome);
-        File settingsDirectory = new File(home, ".decredjwallet");
-        if(!settingsDirectory.exists()) {
-            if(!settingsDirectory.mkdir()) {
-                throw new IllegalStateException(settingsDirectory.toString());
-            }
-        }
-        setDir = settingsDirectory;
-        return settingsDirectory;
     }
 }

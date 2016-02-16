@@ -7,9 +7,6 @@
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import java.util.Iterator;
-import java.util.LinkedList;
-
 /**
  * DecredUtil: Created by Joerg Bayer(admin@sg-o.de) on 31.01.2016.
  * This class is used to communicate with the backend and parse its results.
@@ -54,18 +51,18 @@ public class decredBackend {
      * Get the balance of the current user
      * @return The balanca as a fixedpoint long integer
      */
-    public long getBalance() {
+    public Coin getBalance() throws status {
         try {
             JSONObject temp = new JSONObject(connection.getRequestAnswer(address, getPort(USE_WALLET), comunicationStrings.GETBALANCE));
             comunicationStrings.increaseIndex();
-            if (!temp.has("result")) return 0;
+            if (!temp.has("result")) throw new status(status.GENERICERROR);
             try {
-                return fixedPoint.coinToLong(temp.getDouble("result"));
+                return new Coin(temp.getDouble("result"));
             } catch (Exception e1) {
-                return -1;
+                throw new status(status.GENERICERROR);
             }
         } catch (Exception e) {
-            return -1;
+            throw new status(status.GENERICERROR);
         }
     }
 
@@ -74,21 +71,20 @@ public class decredBackend {
      * @param n The maximum number of transactions to load
      * @return An array of transactions
      */
-    public transaction[] listTransactions(int n) {
+    public transaction[] listTransactions(int n) throws status {
         try {
             JSONObject temp = new JSONObject(connection.getRequestAnswer(address, getPort(USE_WALLET), comunicationStrings.LISTTRANSACTIONS(n)));
             comunicationStrings.increaseIndex();
-            if (!temp.has("result")) return null;
+            if (!temp.has("result")) throw new status(status.GENERICERROR);
             JSONArray transactions = temp.optJSONArray("result");
             transaction[] tempArray = new transaction[transactions.length()];
             for (int i = 0; i < transactions.length(); i++) {
                 JSONObject currentTransaction = transactions.getJSONObject(i);
-                tempArray[i] = new transaction(currentTransaction.optString("txid"), currentTransaction.optString("blockhash"), currentTransaction.optString("address", ""), fixedPoint.coinToLong(currentTransaction.optDouble("amount")), fixedPoint.coinToLong(currentTransaction.optDouble("fee", 0D)), currentTransaction.optInt("confirmations"), currentTransaction.optString("category"), currentTransaction.optLong("time"));
+                tempArray[i] = new transaction(currentTransaction.optString("txid"), currentTransaction.optString("blockhash"), currentTransaction.optString("address", ""), new Coin(currentTransaction.optDouble("amount")), new Coin(currentTransaction.optDouble("fee")), currentTransaction.optInt("confirmations"), currentTransaction.optString("category"), currentTransaction.optLong("time"));
             }
             return tempArray;
         } catch (Exception e){
-
-            return new transaction[0];
+            throw new status(status.GENERICERROR);
         }
     }
 
@@ -132,7 +128,7 @@ public class decredBackend {
      * @return The transaction ID
      * @throws status If there was an error throw the status
      */
-    public String sendToAddress(String toaddress, long ammount) throws status {
+    public String sendToAddress(String toaddress, Coin ammount) throws status {
         JSONObject temp = new JSONObject(connection.getRequestAnswer(address, getPort(USE_WALLET), comunicationStrings.SENDTO(toaddress, ammount)));
         comunicationStrings.increaseIndex();
         if (!temp.has("result")) throw new status(status.GENERICERROR);
@@ -210,19 +206,23 @@ public class decredBackend {
      * @return The relay fee as a fixed point long integer
      * @throws status If there was an error throw the status
      */
-    public long getRelayFee() throws status{
+    public Coin getRelayFee() throws status {
         JSONObject temp = new JSONObject(connection.getRequestAnswer(address, getPort(USE_WALLET), comunicationStrings.GETINFO));
         comunicationStrings.increaseIndex();
         System.out.println(temp);
         if (!temp.has("result")) throw new status(status.GENERICERROR);
         if (temp.has("error")) {
             if (!temp.isNull("error")) {
-                throw new status(status.GENERICERROR);
+
             }
         }
         JSONObject info = temp.optJSONObject("result");
         if(info == null) throw new status(status.GENERICERROR);
-        return fixedPoint.coinToLong(info.optDouble("relayfee", 0d));
+        try {
+            return new Coin(info.optDouble("relayfee", 0d));
+        } catch (Exception e) {
+            throw new status(status.GENERICERROR);
+        }
     }
 
     /**
@@ -230,7 +230,7 @@ public class decredBackend {
      * @param ammount The new transaction fee in the form of a fixed point long integer
      * @throws status If there was an error throw the status
      */
-    public void setTxFee(long ammount) throws status{
+    public void setTxFee(Coin ammount) throws status {
         JSONObject temp = new JSONObject(connection.getRequestAnswer(address, getPort(USE_WALLET), comunicationStrings.SETTXFEE(ammount)));
         comunicationStrings.increaseIndex();
         System.out.println(temp);

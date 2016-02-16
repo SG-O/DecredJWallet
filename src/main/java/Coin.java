@@ -22,8 +22,16 @@ public class Coin {
         setAmount(amount);
     }
 
+    public Coin(Coin amount) throws Exception {
+        setAmount(amount);
+    }
+
     public double getAmount() {
         return ((double) amount / FACTOR);
+    }
+
+    public void setAmount(Coin amount) throws Exception {
+        this.amount = amount.getFixedPointAmount();
     }
 
     public void setAmount(String amount) throws Exception {
@@ -65,6 +73,10 @@ public class Coin {
 
         return amount == coin.amount;
 
+    }
+
+    public boolean equals(long o) {
+        return amount == o;
     }
 
     @Override

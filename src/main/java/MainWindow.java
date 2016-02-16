@@ -17,6 +17,7 @@ import java.awt.event.WindowEvent;
  */
 
 public class MainWindow extends JFrame {
+    public TableModel tableModel;
     // Instance attributes used in this example
     private JPanel topPanel;
     private JPanel controlPanel;
@@ -25,10 +26,8 @@ public class MainWindow extends JFrame {
     private JMenuBar menu;
     private JButton details, sendFunds, getFunds;
     private JLabel ballance;
-
     private settings set;
-
-    public TableModel tableModel;
+    private Coin ballanceValue;
 
     // Constructor of main frame
     public MainWindow(final settings set) {
@@ -107,7 +106,12 @@ public class MainWindow extends JFrame {
                 doSend();
             }
         });
-        ballance = new JLabel("Balance: " + String.format("%.8f",fixedPoint.longToCoin(settings.getBackend().getBalance())));
+        try {
+            ballanceValue = settings.getBackend().getBalance();
+        } catch (status status) {
+            System.out.println(status);
+        }
+        ballance = new JLabel("Balance: " + ballanceValue);
 
         getFunds = new JButton("Receive");
         getFunds.addActionListener(new ActionListener() {
@@ -149,8 +153,17 @@ public class MainWindow extends JFrame {
     }
 
     private void refresh(){
-        ((transactionTableModel)tableModel).changeData(settings.getBackend().listTransactions(set.getTransactionsToLoad()));
-        ballance.setText("Ballance: " + String.format("%.8f",fixedPoint.longToCoin(settings.getBackend().getBalance())));
+        try {
+            ((transactionTableModel) tableModel).changeData(settings.getBackend().listTransactions(set.getTransactionsToLoad()));
+        } catch (status status) {
+            return;
+        }
+        try {
+            ballanceValue = settings.getBackend().getBalance();
+        } catch (status status) {
+            System.out.println(status);
+        }
+        ballance = new JLabel("Balance: " + ballanceValue);
     }
 
     private void about(){

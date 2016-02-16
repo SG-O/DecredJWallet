@@ -37,7 +37,7 @@ public class transactionTableModel  extends AbstractTableModel {
             case 1:
                 return temp.getAddress();
             case 2:
-                return String.format("%.8f", fixedPoint.longToCoin(temp.getAmount()));
+                return temp.getAmount();
             case 3:
                 return temp.getConfirmations();
             case 4:
