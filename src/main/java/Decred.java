@@ -113,7 +113,6 @@ public class Decred {
             if (read.contains(ENCRYPTED_WALLET)) {
                 wallet.destroyForcibly();
                 encrypted = true;
-                System.out.println(encrypted);
                 return false;
             }
             if (read.contains(WALLET_MISSING)) {

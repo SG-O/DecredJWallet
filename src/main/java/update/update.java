@@ -6,27 +6,21 @@
 
 package update;
 
-import org.apache.commons.codec.language.bm.Lang;
 import org.apache.commons.lang3.SystemUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import sun.misc.BASE64Decoder;
 import sun.misc.BASE64Encoder;
 
-import javax.crypto.Cipher;
 import java.io.*;
 import java.math.BigInteger;
-import java.net.MalformedURLException;
 import java.net.URL;
-import java.nio.file.Files;
 import java.security.KeyFactory;
-import java.security.Security;
 import java.security.Signature;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.RSAPublicKeySpec;
-import java.security.spec.X509EncodedKeySpec;
 
 /**
  * DecredUtil: Created by Joerg Bayer(admin@sg-o.de) on 05.02.2016.
@@ -46,7 +40,7 @@ public class update {
 
     //check for updates for the Decred binaries
     //TODO:This has to be rewritten entirely as it is ugly.
-    public static long checkTools(long versionNow){
+    public static long checkTools() {
         if (!SystemUtils.IS_OS_WINDOWS)return -1;
         boolean is64bit = false;
         if (System.getProperty("os.name").contains("Windows")) {
@@ -56,11 +50,9 @@ public class update {
         }
         if (is64bit){
             long now = getUpdatesInfo(DCRDWIN64_URL).optLong("Version", 0);
-            if(versionNow == now) return -1;
             return now;
         } else {
             long now = getUpdatesInfo(DCRDWIN32_URL).optLong("Version", 0);
-            if(versionNow == now) return -1;
             return now;
         }
 

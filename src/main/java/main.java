@@ -14,7 +14,6 @@ import java.io.File;
  */
 
 public class main {
-    static Process dcrd, wallet;
     /*
         The main method is where the the main wallet implementation starts at.
     */
@@ -48,39 +47,40 @@ public class main {
                 }
             }
         }
-
-        if (set.isDoAutoUpdate()){ //TODO: Make this check the real version of the installed Binaries and get rid of this temporary implementation.
-            if (SystemUtils.IS_OS_WINDOWS){ //Check if the user wants this if he has the latest Decred binaries and download them if not.
-                long uT = update.checkTools(set.getToolsVersion());
-                if (set.getToolsVersion()<uT){
-                    UpdateAvailable uA = new UpdateAvailable("Decred binaries are out of date! Update now?");
-                    if (uA.getResult()){
-                        if(!update.getTools()){
-                            new Error("Error", "Could not Update! Please try again.");
-                        } else {
-                            set.setToolsVersion(uT);
+        Decred binaries = new Decred(set.getRPCUser(), set.getRPCPass(), set.isRPCtls(), set.isTestnet());
+        try {
+            if (set.isDoAutoUpdate()) {
+                if (SystemUtils.IS_OS_WINDOWS) { //Check if the user wants this if he has the latest Decred binaries and download them if not.
+                    long uT = update.checkTools();
+                    if (((long) binaries.checkVersion()) < uT) {
+                        UpdateAvailable uA = new UpdateAvailable("Decred binaries are out of date! Update now?");
+                        if (uA.getResult()) {
+                            if (!update.getTools()) {
+                                new Error("Error", "Could not Update! Please try again.");
+                            } else {
+                                set.setToolsVersion(uT);
+                            }
                         }
                     }
                 }
             }
+        } catch (Exception e) {
         }
 
-        //TODO: Check if a wallet has been created and if not, create a new one.
-
-        Runtime runtime = Runtime.getRuntime(); //Now start the back end with the right options
-        String optString = "";
-        String optStringWallet = "";
-        if (!set.isRPCtls()) {
-            optString += "--notls ";
-            optStringWallet += "--noclienttls --noservertls ";
-        }
-        if (set.isTestnet()){
-            optString += "--testnet ";
-            optStringWallet += "--testnet ";
-        }
         try {
-            dcrd = runtime.exec("dcrd " + optString + "-u " + set.getRPCUser() + " -P " + set.getRPCPass());
-            wallet = runtime.exec("dcrwallet " + optStringWallet + "-u " + set.getRPCUser() + " -P " + set.getRPCPass());
+            if (!binaries.startDecred()) {
+                new Error("Could not start decred", "Could not start the decred executable. Maybe another instance is already running. Continuing startup.");
+            }
+            startScreen.setProgress(0.25f);
+            boolean walletStartup = binaries.startWallet();
+            if ((!walletStartup) && (!binaries.isEncrypted())) {
+                new Error("Could not start wallet", "Could not start the wallet executable. Maybe another instance is already running. Continuing startup.");
+            }
+            if ((!walletStartup) && (binaries.isEncrypted())) {
+                new Error("Shutting down", "Wallet is encrypted!");
+                binaries.terminate();
+                System.exit(0);
+            }
         } catch (Exception e){
             new Error("Error", "Decred executables not found!");
             startScreen.dispose();
@@ -89,7 +89,7 @@ public class main {
         int i = 0;
 
         set.connect(); //Now we try to connect to the freshly started backend.
-        startScreen.setProgress(0.33f);
+        startScreen.setProgress(0.5f);
         while (!settings.getBackend().checkConnection()){
             try {
                 i++;
@@ -98,14 +98,14 @@ public class main {
             }
             if (i > 30){
                 new Error("Error", "Could not start Decred!"); //If we could not connect in time exit with an error message
-                set.setToolsVersion(0);
                 startScreen.dispose();
                 new settingsUi(set);
+                binaries.terminate();
                 System.exit(0);
             }
             set.connect();
         }
-        startScreen.setProgress(0.66f);
+        startScreen.setProgress(0.75f);
         while (true) { //Wait for the wallet to load.
             try {
                 settings.getBackend().getBalance();
@@ -121,6 +121,7 @@ public class main {
                 new Error("Error", "Could not start Decred!");
                 new settingsUi(set);
                 startScreen.dispose();
+                binaries.terminate();
                 System.exit(0);
             }
         }
@@ -140,7 +141,6 @@ public class main {
             } catch (InterruptedException e2) {
             }
         }
-        dcrd.destroy(); //End everything.
-        wallet.destroy();
+        binaries.terminate();
     }
 }
