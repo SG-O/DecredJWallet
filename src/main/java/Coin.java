@@ -30,6 +30,13 @@ public class Coin {
         return ((double) amount / FACTOR);
     }
 
+    public void setAmount(double amount) throws Exception {
+        long temp = (long) (amount * FACTOR);
+        if (temp > MAX_AMOUNT) throw new SecurityException();
+        if (temp < (-MAX_AMOUNT)) throw new SecurityException();
+        this.amount = temp;
+    }
+
     public void setAmount(Coin amount) throws Exception {
         this.amount = amount.getFixedPointAmount();
     }
@@ -52,13 +59,6 @@ public class Coin {
         return amount;
     }
 
-    public void setAmount(double amount) throws Exception {
-        long temp = (long) (amount * FACTOR);
-        if (temp > MAX_AMOUNT) throw new SecurityException();
-        if (temp < (-MAX_AMOUNT)) throw new SecurityException();
-        this.amount = temp;
-    }
-
     @Override
     public String toString() {
         return String.format("%." + ZEROS + "f", getAmount());
@@ -68,11 +68,8 @@ public class Coin {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-
         Coin coin = (Coin) o;
-
         return amount == coin.amount;
-
     }
 
     public boolean equals(long o) {
