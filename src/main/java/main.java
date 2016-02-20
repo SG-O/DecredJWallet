@@ -64,7 +64,7 @@ public class main {
                     }
                 }
             }
-        } catch (Exception e) {
+        } catch (Exception ignored) {
         }
 
         try {
@@ -77,12 +77,15 @@ public class main {
                 new Error("Could not start wallet", "Could not start the wallet executable. Maybe another instance is already running. Continuing startup.");
             }
             if ((!walletStartup) && (binaries.isEncrypted())) {
-                new Error("Shutting down", "Wallet is encrypted!");
-                binaries.terminate();
-                System.exit(0);
+                UnlockPublic decrypt = new UnlockPublic(binaries);
+                if (!decrypt.isSuccess()) {
+                    binaries.terminate();
+                    System.exit(0);
+                }
             }
         } catch (Exception e){
             new Error("Error", "Decred executables not found!");
+            binaries.terminate();
             startScreen.dispose();
             System.exit(0);
         }
@@ -94,7 +97,7 @@ public class main {
             try {
                 i++;
                 Thread.sleep(100);
-            } catch (InterruptedException e2) {
+            } catch (InterruptedException ignored) {
             }
             if (i > 30){
                 new Error("Error", "Could not start Decred!"); //If we could not connect in time exit with an error message
@@ -110,12 +113,12 @@ public class main {
             try {
                 settings.getBackend().getBalance();
                 break;
-            } catch (status e) {
+            } catch (status ignored) {
             }
             try {
                 i++;
                 Thread.sleep(100);
-            } catch (InterruptedException e2) {
+            } catch (InterruptedException ignored) {
             }
             if (i > 100){
                 new Error("Error", "Could not start Decred!");
@@ -131,14 +134,14 @@ public class main {
         window.setVisible(true);
         try {
             ((transactionTableModel) window.tableModel).changeData(settings.getBackend().listTransactions(set.getTransactionsToLoad()));
-        } catch (status status) {
+        } catch (status ignored) {
         }
 
         while (window.isVisible()){ //In the future there might be some background tasks we want to perform here but for the moment, we do nothing.
             try {
                 i++;
                 Thread.sleep(100);
-            } catch (InterruptedException e2) {
+            } catch (InterruptedException ignored) {
             }
         }
         binaries.terminate();

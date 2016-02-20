@@ -42,18 +42,16 @@ public class update {
     //TODO:This has to be rewritten entirely as it is ugly.
     public static long checkTools() {
         if (!SystemUtils.IS_OS_WINDOWS)return -1;
-        boolean is64bit = false;
+        boolean is64bit;
         if (System.getProperty("os.name").contains("Windows")) {
             is64bit = (System.getenv("ProgramFiles(x86)") != null);
         } else {
-            is64bit = (System.getProperty("os.arch").indexOf("64") != -1);
+            is64bit = (System.getProperty("os.arch").contains("64"));
         }
         if (is64bit){
-            long now = getUpdatesInfo(DCRDWIN64_URL).optLong("Version", 0);
-            return now;
+            return getUpdatesInfo(DCRDWIN64_URL).optLong("Version", 0);
         } else {
-            long now = getUpdatesInfo(DCRDWIN32_URL).optLong("Version", 0);
-            return now;
+            return getUpdatesInfo(DCRDWIN32_URL).optLong("Version", 0);
         }
 
     }
@@ -68,11 +66,11 @@ public class update {
     //Download or update the Decred binaries
     public static boolean getTools(){
         if (!SystemUtils.IS_OS_WINDOWS)return false;
-        boolean is64bit = false;
+        boolean is64bit;
         if (System.getProperty("os.name").contains("Windows")) {
             is64bit = (System.getenv("ProgramFiles(x86)") != null);
         } else {
-            is64bit = (System.getProperty("os.arch").indexOf("64") != -1);
+            is64bit = (System.getProperty("os.arch").contains("64"));
         }
         if (is64bit){
             return doUpdate(DCRDWIN64_URL);
@@ -83,8 +81,8 @@ public class update {
 
     /**
      * Execute an update with the commands found at the given URL
-     * @param url
-     * @return
+     * @param url The url to update from;
+     * @return True if successfull
      */
     public static boolean doUpdate(String url) {
         JSONObject info = getUpdatesInfo(url);
@@ -124,12 +122,12 @@ public class update {
             updateItem[] todo = parseUpdate.parse(commands, temp);
             for (int i = 0; i < todo.length; i++){ //now parse and execute each command one after the other
                 updateWindow.setProgress(((float)(i+1))/((float)todo.length));
-                if (todo[i].execute() == false) {
+                if (!todo[i].execute()) {
                     System.out.println("Command not executed");
                     updateWindow.dispose();
                     return false;
                 }
-                if (todo[i].check() == false) {
+                if (!todo[i].check()) {
                     System.out.println("Command invalid");
                     updateWindow.dispose();
                     return false;
@@ -210,7 +208,6 @@ public class update {
             BASE64Encoder encoder = new BASE64Encoder();
             return encoder.encode(sigBytes);
         } catch (Exception e) {
-            System.out.println(e);
             return null;
         }
     }

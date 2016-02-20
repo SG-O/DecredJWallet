@@ -11,8 +11,11 @@ public class Decred {
     private static final String WALLET_MISSING = "The wallet does not exist";
     private static final String WALLET_NOT_STARTED = "Can't listen on";
     private static final String WALLET_STARTED = "RPC server listening";
+    private static final String WALLET_WRONG_PASSWORD = "invalid passphrase for master public key";
+
     private static final String DECRED_STARTED = "RPC server listening on";
     private static final String DECRED_NOT_STARTED = "Can't listen on";
+
     private String tlsOptionsDecred = "";
     private String tlsOptionsWallet0 = "";
     private String tlsOptionsWallet1 = "";
@@ -113,6 +116,9 @@ public class Decred {
             if (read.contains(ENCRYPTED_WALLET)) {
                 wallet.destroyForcibly();
                 encrypted = true;
+                return false;
+            }
+            if (read.contains(WALLET_WRONG_PASSWORD)) {
                 return false;
             }
             if (read.contains(WALLET_MISSING)) {
