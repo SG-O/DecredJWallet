@@ -5,6 +5,7 @@
  */
 
 import javax.swing.*;
+import javax.swing.border.BevelBorder;
 import javax.swing.table.TableModel;
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -28,6 +29,8 @@ public class MainWindow extends JFrame {
     private JLabel ballance;
     private settings set;
     private Coin ballanceValue;
+    private JPanel statusPanel;
+    private JPanel footer;
 
     // Constructor of main frame
     public MainWindow(final settings set) {
@@ -93,6 +96,9 @@ public class MainWindow extends JFrame {
         controlPanel = new JPanel();
         controlPanel.setLayout(new FlowLayout());
 
+        footer = new JPanel();
+        footer.setLayout(new BorderLayout());
+
         details = new JButton("More Details");
         details.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
@@ -125,6 +131,14 @@ public class MainWindow extends JFrame {
         controlPanel.add(sendFunds);
         controlPanel.add(getFunds);
 
+        statusPanel = new JPanel();
+        statusPanel.setBorder(new BevelBorder(BevelBorder.LOWERED));
+        statusPanel.setPreferredSize(new Dimension(topPanel.getWidth(), 20));
+        statusPanel.setLayout(new BorderLayout());
+        JLabel statusLabel = new JLabel("Ready");
+        statusLabel.setBorder(BorderFactory.createEmptyBorder(0, 5, 0, 5));
+        statusLabel.setHorizontalAlignment(SwingConstants.LEFT);
+        statusPanel.add(statusLabel, BorderLayout.LINE_START);
 
         // Create a new table instance
         table = new JTable(new transactionTableModel());
@@ -133,8 +147,9 @@ public class MainWindow extends JFrame {
         // Add the table to a scrolling pane
         scrollPane = new JScrollPane(table);
         topPanel.add(scrollPane, BorderLayout.CENTER);
-        topPanel.add(controlPanel, BorderLayout.PAGE_END);
-
+        topPanel.add(footer, BorderLayout.PAGE_END);
+        footer.add(controlPanel, BorderLayout.PAGE_START);
+        footer.add(statusPanel, BorderLayout.PAGE_END);
         setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
         addWindowListener(new WindowAdapter() {
             public void windowClosing(WindowEvent e) {
