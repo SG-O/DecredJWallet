@@ -67,6 +67,45 @@ public class decredBackend {
     }
 
     /**
+     * Get the unconfirmed balance of the current user
+     * @return The balanca as a fixedpoint long integer
+     */
+    public Coin getUnconfirmedBalance() throws status {
+        try {
+            JSONObject temp = new JSONObject(connection.getRequestAnswer(address, getPort(USE_WALLET), comunicationStrings.GETUNCONFIRMEDBALANCE));
+            comunicationStrings.increaseIndex();
+            if (!temp.has("result")) throw new status(status.GENERICERROR);
+            try {
+                return new Coin(temp.getDouble("result"));
+            } catch (Exception e1) {
+                throw new status(status.GENERICERROR);
+            }
+        } catch (Exception e) {
+            throw new status(status.GENERICERROR);
+        }
+    }
+
+    /**
+     * Get the unconfirmed balance of the current user
+     *
+     * @return The balanca as a fixedpoint long integer
+     */
+    public long getBlockCount() throws status {
+        try {
+            JSONObject temp = new JSONObject(connection.getRequestAnswer(address, getPort(USE_WALLET), comunicationStrings.GETBLOCKCOUNT));
+            comunicationStrings.increaseIndex();
+            if (!temp.has("result")) throw new status(status.GENERICERROR);
+            try {
+                return temp.optLong("result", 0l);
+            } catch (Exception e1) {
+                throw new status(status.GENERICERROR);
+            }
+        } catch (Exception e) {
+            throw new status(status.GENERICERROR);
+        }
+    }
+
+    /**
      * List a number of transactions
      * @param n The maximum number of transactions to load
      * @return An array of transactions

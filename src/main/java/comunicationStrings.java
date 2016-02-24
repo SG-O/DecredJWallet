@@ -12,6 +12,8 @@ public class comunicationStrings {
     private static int index = 0;
 
     public static String GETBALANCE = "{\"method\":\"getbalance\",\"params\":[],\"id\":"+index+"}";
+    public static String GETUNCONFIRMEDBALANCE = "{\"method\":\"getunconfirmedbalance\",\"params\":[],\"id\":" + index + "}";
+    public static String GETBLOCKCOUNT = "{\"method\":\"getblockcount\",\"params\":[],\"id\":" + index + "}";
     public static String LOCKWALLET = "{\"method\":\"walletlock\",\"params\":[],\"id\":"+index+"}";
     public static String GETNEWADDRESS = "{\"method\":\"getnewaddress\",\"params\":[],\"id\":"+index+"}";
     public static String GETINFO = "{\"method\":\"getinfo\",\"params\":[],\"id\":"+index+"}";

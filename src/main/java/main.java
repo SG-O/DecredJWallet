@@ -17,6 +17,7 @@ public class main {
     /*
         The main method is where the the main wallet implementation starts at.
     */
+
     public static void main(String[] args) {
         StartUp startScreen = new StartUp();
         File Updater = new File("DcrdUpdater.jar"); //Is there an old updater present? If yes, delete it.
@@ -130,18 +131,38 @@ public class main {
         }
         startScreen.dispose(); //Get rid of the loading screen and show the main window
 
-        MainWindow window = new MainWindow(set);
+        Overview window = new Overview(set);
         window.setVisible(true);
-        try {
-            ((transactionTableModel) window.tableModel).changeData(settings.getBackend().listTransactions(set.getTransactionsToLoad()));
-        } catch (status ignored) {
-        }
+
+        boolean catchingUp = false;
 
         while (window.isVisible()){ //In the future there might be some background tasks we want to perform here but for the moment, we do nothing.
             try {
                 i++;
-                Thread.sleep(100);
+                long nowBlock;
+                long maxBlock;
+                if (binaries.parseDecred()) {
+                    maxBlock = binaries.getMaxBlock();
+                    nowBlock = settings.getBackend().getBlockCount();
+                    System.out.println("Catching up: Block " + nowBlock + " of " + maxBlock);
+                    if (maxBlock > nowBlock + 10) {
+                        catchingUp = true;
+                    }
+                }
+                if (catchingUp) {
+                    maxBlock = binaries.getMaxBlock();
+                    nowBlock = settings.getBackend().getBlockCount();
+                    window.setStatus("Catching up: Block " + nowBlock + " of " + maxBlock);
+                    if (maxBlock == nowBlock) {
+                        catchingUp = false;
+                        window.resetStatus();
+                        System.out.println("Caught up");
+                    }
+                }
+                Thread.sleep(5000);
+                window.refresh();
             } catch (InterruptedException ignored) {
+            } catch (status status) {
             }
         }
         binaries.terminate();

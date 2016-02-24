@@ -2,6 +2,8 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.LinkedList;
+import java.util.Queue;
 
 /**
  * DecredJWallet: Created by Joerg Bayer(admin@sg-o.de) on 16.02.2016.
@@ -15,6 +17,7 @@ public class Decred {
 
     private static final String DECRED_STARTED = "RPC server listening on";
     private static final String DECRED_NOT_STARTED = "Can't listen on";
+    private static final String DECRED_SYNCING = "Syncing to block height";
 
     private String tlsOptionsDecred = "";
     private String tlsOptionsWallet0 = "";
@@ -26,6 +29,9 @@ public class Decred {
     private boolean encrypted = false;
     private BufferedReader dcrdReader, walletReader;
     private Process dcrd, wallet;
+    private Queue<String> secondBuffer = new LinkedList<String>();
+
+    private long maxBlock = -1;
 
     public Decred(String username, String password, boolean tls, boolean testNet) {
         this.username = username;
@@ -43,6 +49,10 @@ public class Decred {
 
     public boolean isEncrypted() {
         return encrypted;
+    }
+
+    public long getMaxBlock() {
+        return maxBlock;
     }
 
     public int checkVersion() throws Exception {
@@ -137,15 +147,34 @@ public class Decred {
         return false;
     }
 
-    public String readDecred() {
-        if (dcrdReader == null) return null;
+    public boolean parseDecred() {
+        if (dcrdReader == null) return false;
+        String read;
+        boolean ret = false;
         try {
-            String read = dcrdReader.readLine();
-            return read;
+            while (dcrdReader.ready()) {
+                read = dcrdReader.readLine();
+                secondBuffer.add(read);
+                if (read.contains(DECRED_SYNCING)) {
+                    read = read.substring(0, read.indexOf("from peer"));
+                    read = read.substring(read.indexOf(DECRED_SYNCING));
+                    read = read.replaceAll("\\D+", "");
+                    this.maxBlock = Long.parseLong(read);
+                    return true;
+                }
+            }
+            return ret;
         } catch (IOException e) {
             System.out.println(e);
-            return null;
+            return false;
         }
+    }
+
+    public String readDecred() {
+        parseDecred();
+        if (!secondBuffer.isEmpty()) {
+            return (secondBuffer.remove());
+        } else return null;
     }
 
     public String readWallet() {
