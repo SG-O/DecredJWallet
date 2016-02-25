@@ -6,9 +6,11 @@
 
 package update;
 
+import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
+import java.io.IOException;
 
 public class Updating extends JDialog {
     private JPanel contentPane;
@@ -26,6 +28,10 @@ public class Updating extends JDialog {
             }
         });
 
+        try {
+            setIconImage(ImageIO.read(ClassLoader.getSystemResource("favicon.png")));
+        } catch (IOException e) {
+        }
 
 // call onCancel() when cross is clicked
         setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);

@@ -4,9 +4,11 @@
  * Permissions beyond the scope of this license may be available at https://www.sg-o.de/.
  */
 
+import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
+import java.io.IOException;
 
 /**
  * DecredUtil: Created by Joerg Bayer(admin@sg-o.de) on 04.02.2016.
@@ -30,6 +32,10 @@ public class About extends JDialog{
             }
         });
 
+        try {
+            setIconImage(ImageIO.read(ClassLoader.getSystemResource("favicon.png")));
+        } catch (IOException e) {
+        }
 
 // call onCancel() when cross is clicked
         setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);

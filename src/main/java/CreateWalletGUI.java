@@ -4,15 +4,14 @@
  * Permissions beyond the scope of this license may be available at https://www.sg-o.de/.
  */
 
-import groovy.ui.*;
-
+import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
-import java.io.*;
-import java.io.Console;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.Arrays;
-import java.util.concurrent.Executor;
 
 /**
  * Decred Util: Created by Joerg Bayer (admin@sg-o.de) on 04.02.2016.
@@ -38,6 +37,11 @@ public class CreateWalletGUI extends JDialog{
         } catch (Exception e) {
         }
         seed.setVisible(false);
+
+        try {
+            setIconImage(ImageIO.read(ClassLoader.getSystemResource("favicon.png")));
+        } catch (IOException e) {
+        }
 
         useSeed.addItemListener(new ItemListener() {
             public void itemStateChanged(ItemEvent e) {

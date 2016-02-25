@@ -1,6 +1,8 @@
+import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
+import java.io.IOException;
 
 public class UnlockPublic extends JDialog {
     private JPanel contentPane;
@@ -19,6 +21,12 @@ public class UnlockPublic extends JDialog {
         setTitle("Unlock Wallet");
         getRootPane().setDefaultButton(buttonOK);
         pack();
+
+        try {
+            setIconImage(ImageIO.read(ClassLoader.getSystemResource("favicon.png")));
+        } catch (IOException e) {
+        }
+
         status.setText("");
         setSize(new Dimension(400, 150));
         setMaximumSize(getSize());

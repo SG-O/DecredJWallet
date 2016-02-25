@@ -4,8 +4,10 @@
  * Permissions beyond the scope of this license may be available at https://www.sg-o.de/.
  */
 
+import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.event.*;
+import java.io.IOException;
 
 public class UpdateAvailable extends JDialog {
     private JPanel contentPane;
@@ -21,6 +23,11 @@ public class UpdateAvailable extends JDialog {
         setModal(true);
         text.setText(Message);
         getRootPane().setDefaultButton(buttonOK);
+
+        try {
+            setIconImage(ImageIO.read(ClassLoader.getSystemResource("favicon.png")));
+        } catch (IOException e) {
+        }
 
         buttonOK.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {

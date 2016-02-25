@@ -20,6 +20,7 @@ public class main {
 
     public static void main(String[] args) {
         StartUp startScreen = new StartUp();
+        startScreen.setStatus("Loading settings");
         File Updater = new File("DcrdUpdater.jar"); //Is there an old updater present? If yes, delete it.
         if(Updater.exists()){
             Updater.delete();
@@ -29,6 +30,7 @@ public class main {
             new settingsUi(set); //If this is the first start of this wallet, show the Settings Dialog and let the user change his settings.
         }
         if (set.isDoAutoUpdate()){ //If the user wants this, check for new updates, inform him about any and if wanted update.
+            startScreen.setStatus("Checking for updates");
             if (update.checkUpdates()){
                 UpdateAvailable uA = new UpdateAvailable("A new Update is available! Do you want to update now?");
                 if (uA.getResult()){
@@ -67,12 +69,13 @@ public class main {
             }
         } catch (Exception ignored) {
         }
-
+        startScreen.setStatus("Starting Decred");
         try {
             if (!binaries.startDecred()) {
                 new Error("Could not start decred", "Could not start the decred executable. Maybe another instance is already running. Continuing startup.");
             }
             startScreen.setProgress(0.25f);
+            startScreen.setStatus("Starting Wallet");
             boolean walletStartup = binaries.startWallet();
             if ((!walletStartup) && (!binaries.isEncrypted())) {
                 new Error("Could not start wallet", "Could not start the wallet executable. Maybe another instance is already running. Continuing startup.");
@@ -94,6 +97,7 @@ public class main {
 
         set.connect(); //Now we try to connect to the freshly started backend.
         startScreen.setProgress(0.5f);
+        startScreen.setStatus("Connecting to backend");
         while (!settings.getBackend().checkConnection()){
             try {
                 i++;
@@ -110,6 +114,7 @@ public class main {
             set.connect();
         }
         startScreen.setProgress(0.75f);
+        startScreen.setStatus("Waiting for wallet to finish loading");
         while (true) { //Wait for the wallet to load.
             try {
                 settings.getBackend().getBalance();
@@ -141,6 +146,7 @@ public class main {
                 i++;
                 long nowBlock;
                 long maxBlock;
+                int sleeptime = 30000;
                 if (binaries.parseDecred()) {
                     maxBlock = binaries.getMaxBlock();
                     nowBlock = settings.getBackend().getBlockCount();
@@ -150,6 +156,7 @@ public class main {
                     }
                 }
                 if (catchingUp) {
+                    sleeptime = 100;
                     maxBlock = binaries.getMaxBlock();
                     nowBlock = settings.getBackend().getBlockCount();
                     window.setStatus("Catching up: Block " + nowBlock + " of " + maxBlock);
@@ -159,7 +166,7 @@ public class main {
                         System.out.println("Caught up");
                     }
                 }
-                Thread.sleep(5000);
+                Thread.sleep(sleeptime);
                 window.refresh();
             } catch (InterruptedException ignored) {
             } catch (status status) {

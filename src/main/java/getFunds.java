@@ -36,6 +36,11 @@ public class getFunds extends JDialog{
         setSize(620,410);
         getRootPane().setDefaultButton(buttonOK);
 
+        try {
+            setIconImage(ImageIO.read(ClassLoader.getSystemResource("favicon.png")));
+        } catch (IOException e) {
+        }
+
         buttonOK.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 onOK();

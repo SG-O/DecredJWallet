@@ -4,9 +4,11 @@
  * Permissions beyond the scope of this license may be available at https://www.sg-o.de/.
  */
 
+import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
+import java.io.IOException;
 
 public class Unlock extends JDialog {
     private JPanel contentPane;
@@ -21,6 +23,11 @@ public class Unlock extends JDialog {
         setMinimumSize(new Dimension(300, 200));
         setSize(300,200);
         getRootPane().setDefaultButton(buttonOK);
+
+        try {
+            setIconImage(ImageIO.read(ClassLoader.getSystemResource("favicon.png")));
+        } catch (IOException e) {
+        }
 
         buttonOK.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {

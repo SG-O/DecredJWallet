@@ -4,6 +4,7 @@
  * Permissions beyond the scope of this license may be available at https://www.sg-o.de/.
  */
 
+import javax.imageio.ImageIO;
 import javax.swing.*;
 import javax.swing.table.TableModel;
 import java.awt.*;
@@ -11,6 +12,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.io.IOException;
 
 /**
  * Decred Util: Created by Joerg Bayer (admin@sg-o.de) on 24.02.2016.
@@ -41,6 +43,11 @@ public class Overview extends JFrame {
         }
         setLocationRelativeTo(null);
 
+        try {
+            setIconImage(ImageIO.read(ClassLoader.getSystemResource("favicon.png")));
+        } catch (IOException e) {
+        }
+
         generateMenu();
         setJMenuBar(menu);
 
@@ -69,7 +76,7 @@ public class Overview extends JFrame {
                 dispose();
             }
         });
-
+        statusString.setText("");
         refresh();
     }
 

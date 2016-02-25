@@ -4,9 +4,11 @@
  * Permissions beyond the scope of this license may be available at https://www.sg-o.de/.
  */
 
+import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
+import java.io.IOException;
 
 /**
  * DecredUtil: Created by Joerg Bayer(admin@sg-o.de) on 02.02.2016.
@@ -35,6 +37,12 @@ public class settingsUi extends JDialog{
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
         } catch (Exception e) {
         }
+
+        try {
+            setIconImage(ImageIO.read(ClassLoader.getSystemResource("favicon.png")));
+        } catch (IOException e) {
+        }
+
         this.set = set;
         contentPane.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
         setMinimumSize(new Dimension(400, 350));

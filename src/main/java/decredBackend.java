@@ -92,7 +92,7 @@ public class decredBackend {
      */
     public long getBlockCount() throws status {
         try {
-            JSONObject temp = new JSONObject(connection.getRequestAnswer(address, getPort(USE_WALLET), comunicationStrings.GETBLOCKCOUNT));
+            JSONObject temp = new JSONObject(connection.getRequestAnswer(address, getPort(USE_DECRED), comunicationStrings.GETBLOCKCOUNT));
             comunicationStrings.increaseIndex();
             if (!temp.has("result")) throw new status(status.GENERICERROR);
             try {
