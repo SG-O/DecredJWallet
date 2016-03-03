@@ -35,7 +35,7 @@ public class update {
 
     //check for updates
     public static boolean checkUpdates() {
-        return softwareInfo.version != getUpdatesInfo(UPDATE_URL).optLong("Version", 0);
+        return softwareInfo.version < getUpdatesInfo(UPDATE_URL).optLong("Version", 0);
     }
 
     //check for updates for the Decred binaries
