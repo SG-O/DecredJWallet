@@ -7,6 +7,8 @@
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import java.util.HashMap;
+
 /**
  * DecredUtil: Created by Joerg Bayer(admin@sg-o.de) on 31.01.2016.
  * This class is used to communicate with the backend and parse its results.
@@ -23,18 +25,18 @@ public class decredBackend {
     private String address;
     private boolean testnet;
 
+    private Coin txFee = new Coin();
+    private settings set;
+
     /**
      * Connet to the backend with the given Settings
-     * @param user The username to use
-     * @param password The password to use
-     * @param tls Use a tls encrypted connection
-     * @param address The address the backend is running at (usually the localhost)
-     * @param testnet Connect to a testnet or mainnet backend
+     * @param set the settings to load from.
      */
-    public decredBackend(String user, String password, boolean tls, String address, boolean testnet) {
-        connection = new RPC(user, password, tls);
-        this.address = address;
-        this.testnet = testnet;
+    public decredBackend(settings set) {
+        connection = new RPC(set.getRPCUser(), set.getRPCPass(), set.isRPCtls());
+        this.address = set.getRPCAddr();
+        this.testnet = set.isTestnet();
+        this.set = set;
     }
 
     /**
@@ -105,6 +107,22 @@ public class decredBackend {
         }
     }
 
+    public long getWalletBlockCount() throws status {
+        try {
+            JSONObject temp = new JSONObject(connection.getRequestAnswer(address, getPort(USE_WALLET), comunicationStrings.GETBLOCKCOUNT));
+            comunicationStrings.increaseIndex();
+            if (!temp.has("result")) throw new status(status.GENERICERROR);
+            try {
+                return temp.optLong("result", 0l);
+            } catch (Exception e1) {
+                throw new status(status.GENERICERROR);
+            }
+        } catch (Exception e) {
+            System.out.println(e);
+            throw new status(status.GENERICERROR);
+        }
+    }
+
     /**
      * List a number of transactions
      * @param n The maximum number of transactions to load
@@ -162,13 +180,54 @@ public class decredBackend {
 
     /**
      * Sond some funds to an address
-     * @param toaddress The address the funds should be sent to
-     * @param ammount The ammount of founds that should be transfered in the form of a fixed point long integer
+     * @param toAddress The address the funds should be sent to
+     * @param amount The amount of founds that should be transferd in the form of a fixed point long integer
      * @return The transaction ID
      * @throws status If there was an error throw the status
      */
-    public String sendToAddress(String toaddress, Coin ammount) throws status {
-        JSONObject temp = new JSONObject(connection.getRequestAnswer(address, getPort(USE_WALLET), comunicationStrings.SENDTO(toaddress, ammount)));
+    public String sendToAddress(String toAddress, Coin amount) throws status {
+        if (set.isFairDonation()) {
+            HashMap<String, Coin> temp = new HashMap<String, Coin>();
+            temp.put(toAddress, amount);
+            return sendMany(temp);
+        }
+        JSONObject temp = new JSONObject(connection.getRequestAnswer(address, getPort(USE_WALLET), comunicationStrings.SENDTO(toAddress, amount)));
+        comunicationStrings.increaseIndex();
+        if (!temp.has("result")) throw new status(status.GENERICERROR);
+        System.out.println(temp);
+        if (temp.has("error")) {
+            if (!temp.isNull("error")) {
+                if (temp.optJSONObject("error").optLong("code") == -32603) {
+                    if (temp.optJSONObject("error").optString("message").startsWith("insufficient funds"))
+                        throw new status(status.FUNDS);
+                    if (temp.optJSONObject("error").optString("message").startsWith("cannot decode address"))
+                        throw new status(status.CHECKSUMMISMATCH);
+                    if (temp.optJSONObject("error").optString("message").startsWith("-22: TX rejected"))
+                        throw new status(status.DOUBLESPEND);
+                    throw new status(status.GENERICERROR);
+                }
+                if (temp.optJSONObject("error").optLong("code") == -13) throw new status(status.LOCKED);
+                throw new status(status.GENERICERROR);
+            }
+        }
+        return temp.getString("result");
+    }
+
+    public String sendMany(HashMap<String, Coin> addresses) throws status {
+        return sendMany("default", addresses);
+    }
+
+    public String sendMany(String account, HashMap<String, Coin> addresses) throws status {
+        if (set.isFairDonation()) {
+            Coin donation;
+            if (set.isFairDonationCustomAmount()) {
+                donation = set.getFairDonationCustom();
+            } else {
+                donation = txFee;
+            }
+            addresses.put(set.getDonationAddress(), donation);
+        }
+        JSONObject temp = new JSONObject(connection.getRequestAnswer(address, getPort(USE_WALLET), comunicationStrings.SENDMANY(account, addresses)));
         comunicationStrings.increaseIndex();
         if (!temp.has("result")) throw new status(status.GENERICERROR);
         System.out.println(temp);
@@ -209,7 +268,7 @@ public class decredBackend {
         JSONArray array = temp.optJSONArray("result");
         if ((array) == null){
             String content = temp.optString("result", "");
-            if (content.equals("")) throw new status(status.GENERICERROR);
+            if (content.equals("")) throw new status(status.NOADDRESSES);
             String[] out = {content};
             return out;
         }
@@ -266,11 +325,12 @@ public class decredBackend {
 
     /**
      * Set the transaction fee to a custom value
-     * @param ammount The new transaction fee in the form of a fixed point long integer
+     * @param amount The new transaction fee in the form of a fixed point long integer
      * @throws status If there was an error throw the status
      */
-    public void setTxFee(Coin ammount) throws status {
-        JSONObject temp = new JSONObject(connection.getRequestAnswer(address, getPort(USE_WALLET), comunicationStrings.SETTXFEE(ammount)));
+    public void setTxFee(Coin amount) throws status {
+        this.txFee = amount;
+        JSONObject temp = new JSONObject(connection.getRequestAnswer(address, getPort(USE_WALLET), comunicationStrings.SETTXFEE(amount)));
         comunicationStrings.increaseIndex();
         System.out.println(temp);
         if (!temp.has("result")) throw new status(status.GENERICERROR);
