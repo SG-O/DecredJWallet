@@ -6,9 +6,22 @@
 
 package update;
 
+import java.util.Properties;
+
 /**
  * DecredUtil: Created by Joerg Bayer(admin@sg-o.de) on 06.02.2016.
  */
 public class softwareInfo {
-    public static final long version = 6;
+    public static long getVersion() {
+        try {
+            final Properties properties = new Properties();
+            properties.load(softwareInfo.class.getResourceAsStream("../project.properties"));
+            String version = properties.getProperty("version");
+            version = version.replaceAll("\\D+", "");
+            long vers = Long.parseLong(version);
+            return vers;
+        } catch (Exception e) {
+            return 0;
+        }
+    }
 }

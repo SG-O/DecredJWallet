@@ -48,6 +48,22 @@
           <option name="goal" value="clean" />
           <option name="projectPath" value="$PROJECT_DIR$/pom.xml" />
         </MavenCompilerTask>
+        <MavenCompilerTask>
+          <option name="goal" value="org.apache.maven.plugins:maven-resources-plugin:2.6:resources" />
+          <option name="projectPath" value="$PROJECT_DIR$/pom.xml" />
+        </MavenCompilerTask>
+        <MavenCompilerTask>
+          <option name="goal" value="org.apache.maven.plugins:maven-resources-plugin:2.7:resources" />
+          <option name="projectPath" value="$PROJECT_DIR$/pom.xml" />
+        </MavenCompilerTask>
+      </set>
+    </option>
+    <option name="beforeRebuildTask">
+      <set>
+        <MavenCompilerTask>
+          <option name="goal" value="org.apache.maven.plugins:maven-resources-plugin:2.7:resources" />
+          <option name="projectPath" value="$PROJECT_DIR$/pom.xml" />
+        </MavenCompilerTask>
       </set>
     </option>
   </component>

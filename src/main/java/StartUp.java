@@ -8,6 +8,7 @@
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.io.IOException;
+import java.util.Properties;
 
 /**
  * Decred Util: Created by Joerg Bayer (admin@sg-o.de) on 28.01.2016.
@@ -16,6 +17,7 @@ public class StartUp extends JFrame{
     private JProgressBar progressBar1;
     private JPanel rootPanel;
     private JLabel status;
+    private JLabel version;
 
     public StartUp(){
         super("");
@@ -32,6 +34,12 @@ public class StartUp extends JFrame{
         setUndecorated(true);
         setContentPane(rootPanel);
         pack();
+        final Properties properties = new Properties();
+        try {
+            properties.load(this.getClass().getResourceAsStream("project.properties"));
+            version.setText(properties.getProperty("version"));
+        } catch (IOException e) {
+        }
         status.setText("");
         setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
         setResizable(false);
