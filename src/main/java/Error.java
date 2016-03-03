@@ -17,6 +17,7 @@ public class Error extends JDialog {
     public Error(String title, String er) {
         setContentPane(contentPane);
         setModal(true);
+        setAlwaysOnTop(true);
         setTitle(title);
         getRootPane().setDefaultButton(buttonOK);
         errorType.setText(er);
