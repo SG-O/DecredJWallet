@@ -8,7 +8,6 @@ package update;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
-import org.junit.Assert;
 import org.junit.Test;
 
 import java.awt.*;
@@ -16,7 +15,8 @@ import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.StringSelection;
 import java.io.File;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 /**
  * DecredUtil: Created by Joerg Bayer(admin@sg-o.de) on 06.02.2016.
@@ -25,7 +25,7 @@ public class updateTest {
 
     @Test
     public void testCheckUpdates() throws Exception {
-        assertFalse(update.checkUpdates());
+        assertFalse(update.checkUpdates(9999999));
     }
 
     @Test
@@ -40,8 +40,16 @@ public class updateTest {
 
     @Test
     public void buildToolsUpdate() throws Exception {
-        String URL = "https://github.com/decred/dcrd/releases/download/v0.0.2/windows-amd64-20160208-01.zip";
-        String Relative = "windows-amd64";
+        String type = "w32";
+        String URL;
+        String Relative;
+        if (type.equals("w64")) {
+            URL = "https://github.com/decred/decred-release/releases/download/v0.0.5/windows-amd64-20160226-01.zip";
+            Relative = "windows-amd64";
+        } else if (type.equals("w32")) {
+            URL = "https://github.com/decred/decred-release/releases/download/v0.0.5/windows-386-20160226-01.zip";
+            Relative = "windows-386";
+        } else return;
         File temp = File.createTempFile("dcrd", Long.toString(System.nanoTime()));
         if(!(temp.delete()))
         {
@@ -78,7 +86,7 @@ public class updateTest {
 
     @Test
     public void buildMainUpdate() throws Exception {
-        String URL = "http://sg-o.de/upd/V2/DecredJWallet.jar";
+        String URL = "http://sg-o.de/upd/V6/DecredJWallet.jar";
         String Updater = "https://github.com/SG-O/DcrdJGUIUpdater/releases/download/0.1/DcrdUpdater.jar";
         String RelativeURL = "DecredJWallet.jar.update";
         String RelativeUpdater = "DcrdUpdater.jar";
