@@ -10,5 +10,5 @@ package update;
  * DecredUtil: Created by Joerg Bayer(admin@sg-o.de) on 06.02.2016.
  */
 public class softwareInfo {
-    public static final long version = 3;
+    public static final long version = 6;
 }
