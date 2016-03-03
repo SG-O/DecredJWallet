@@ -11,6 +11,8 @@ import javax.swing.event.ChangeListener;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
 
 public class newTransaction extends JDialog {
     private JPanel contentPane;
@@ -20,16 +22,41 @@ public class newTransaction extends JDialog {
     private JTextField value;
     private JSlider feeSlider;
     private JLabel feeValue;
+    private JTabbedPane tabbs;
+    private JLabel addressLabel;
+    private JLabel valueLabel;
+    private JPanel advancedTabContent;
+    private JButton addButton;
+    private JLabel donationMessage;
+    private JPanel aTab;
+    private JPanel advancedTab;
 
-    private Coin baseUnit;
+    private ArrayList<JTextField[]> advancedInputs = new ArrayList<JTextField[]>();
 
-    public newTransaction() {
+    private Coin baseUnit = new Coin();
+    private settings set;
+
+    public newTransaction(settings set) {
+        this("", new Coin(), set);
+    }
+
+    public newTransaction(String to, Coin amount, settings set) {
         setContentPane(contentPane);
         setTitle("New Transaction");
         setModal(true);
-        setMinimumSize(new Dimension(400, 200));
-        setSize(400,200);
+        setMinimumSize(new Dimension(400, 400));
+        setSize(400, 400);
+        this.set = set;
         getRootPane().setDefaultButton(buttonOK);
+
+        if (to == null) {
+            to = "";
+        }
+        if (amount == null) {
+            amount = new Coin();
+        }
+        addr.setText(to);
+        value.setText(amount.toString());
 
         try {
             setIconImage(ImageIO.read(ClassLoader.getSystemResource("favicon.png")));
@@ -69,26 +96,75 @@ public class newTransaction extends JDialog {
             }
         });
         getBaseUnit();
+        if (set.isFairDonation()) {
+            Coin donation = baseUnit;
+            if (set.isFairDonationCustomAmount()) {
+                donation = set.getFairDonationCustom();
+            }
+            donationMessage.setText("You will donate " + donation);
+        } else {
+            donationMessage.setText("");
+        }
         setLocationRelativeTo(null);
+        advancedTab = new JPanel(new GridLayout(0, 1, 0, 5));
+        advancedTab.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
+        advancedTabContent.add(advancedTab, BorderLayout.NORTH);
+        addButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                createEntry();
+                advancedTab.revalidate();
+            }
+        });
+        createEntry();
         setVisible(true);
     }
 
     private void onOK() {
 // add your code here
-        Coin value;
-        try {
-            value = new Coin(this.value.getText());
-        } catch (Exception e){
-            new Error("Error", "Value cannot be read.");
-            return;
-        }
-        if (addr.getText().equals("")){
-            new Error("Error", "No address entered");
-            return;
+        Coin value = null;
+        HashMap<String, Coin> temp = new HashMap<String, Coin>();
+        if (tabbs.getSelectedIndex() == 1) {
+            for (int i = 0; i < advancedInputs.size(); i++) {
+                JTextField[] inputs = advancedInputs.get(i);
+                if (inputs != null) {
+                    String addr = inputs[0].getText();
+                    if (addr.equals("")) {
+                        new Error("Error", "No address entered for target " + (i + 1) + ".");
+                        return;
+                    }
+                    try {
+                        value = new Coin(inputs[1].getText());
+                    } catch (Exception e) {
+                        new Error("Error", "Value for " + addr + " can not be read.");
+                        return;
+                    }
+                    if (value.getFixedPointAmount() > 0) {
+                        temp.put(addr, value);
+                    }
+                }
+            }
+            if (temp.size() < 1) {
+                new Error("Error", "No transaction entered.");
+                return;
+            }
+        } else {
+            try {
+                value = new Coin(this.value.getText());
+            } catch (Exception e) {
+                new Error("Error", "Value can not be read.");
+                return;
+            }
+            if (addr.getText().equals("")) {
+                new Error("Error", "No address entered.");
+                return;
+            }
+            if (value.getFixedPointAmount() <= 0) {
+                new Error("Error", "Please enter a number that is greater than zero");
+            }
         }
         decredBackend backend = settings.getBackend();
         if (backend == null){
-            new Error("Error", "Wallet not connected");
+            new Error("Error", "Wallet not connected.");
             dispose();
             return;
         }
@@ -98,7 +174,7 @@ public class newTransaction extends JDialog {
             return;
         }
         if (baseUnit == null) {
-            new Error("Error", "Can not set TX Fee");
+            new Error("Error", "Can not set TX Fee.");
             dispose();
             return;
         }
@@ -107,7 +183,12 @@ public class newTransaction extends JDialog {
             Coin txFee = new Coin(baseUnit);
             txFee.mul(feeSlider.getValue());
             backend.setTxFee(txFee);
-            String ID = backend.sendToAddress(addr.getText(), value);
+            String ID = "";
+            if (tabbs.getSelectedIndex() == 1) {
+                ID = backend.sendMany(temp);
+            } else if (value != null) {
+                ID = backend.sendToAddress(addr.getText(), value);
+            }
             new Error("Success", "TXID:" + ID);
         } catch (status s){
             if (s.getStatus() == status.LOCKED){
@@ -147,11 +228,74 @@ public class newTransaction extends JDialog {
         }
     }
 
+    private void createEntry() {
+        JTextField[] tempFields = new JTextField[2];
+        Dimension sizeLabel = new Dimension(60, 16);
+        final JPanel subItem0 = new JPanel();
+        subItem0.setLayout(new BoxLayout(subItem0, BoxLayout.X_AXIS));
+        final JLabel infoText = new JLabel(addressLabel.getText());
+        infoText.setMinimumSize(sizeLabel);
+        infoText.setPreferredSize(sizeLabel);
+        infoText.setMaximumSize(sizeLabel);
+        JTextField input = new JTextField();
+        tempFields[0] = input;
+        subItem0.add(infoText);
+        subItem0.add(input);
+        advancedTab.add(subItem0);
+
+        final JPanel subItem1 = new JPanel();
+        subItem1.setLayout(new BoxLayout(subItem1, BoxLayout.X_AXIS));
+        final JLabel infoTextValue = new JLabel(valueLabel.getText());
+        infoTextValue.setMinimumSize(sizeLabel);
+        infoTextValue.setPreferredSize(sizeLabel);
+        infoTextValue.setMaximumSize(sizeLabel);
+        final JTextField inputValue = new JTextField();
+        tempFields[1] = inputValue;
+        subItem1.add(infoTextValue);
+        subItem1.add(inputValue);
+        advancedTab.add(subItem1);
+        advancedInputs.add(tempFields);
+        final int index = advancedInputs.size() - 1;
+        final JSeparator sep = new JSeparator();
+        final JButton delButton = new JButton("Remove");
+        delButton.setAlignmentX(Component.RIGHT_ALIGNMENT);
+        final JPanel subItem2 = new JPanel();
+        subItem2.setLayout(new BoxLayout(subItem2, BoxLayout.X_AXIS));
+        subItem2.setAlignmentX(Component.RIGHT_ALIGNMENT);
+        subItem2.add(Box.createHorizontalGlue());
+        subItem2.add(delButton);
+        advancedTab.add(subItem2);
+        advancedTab.add(sep);
+        delButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                advancedTab.remove(delButton);
+                advancedTab.remove(infoTextValue);
+                advancedTab.remove(infoText);
+                advancedTab.remove(inputValue);
+                advancedTab.remove(sep);
+                advancedTab.remove(subItem0);
+                advancedTab.remove(subItem1);
+                advancedTab.remove(subItem2);
+                advancedInputs.set(index, null);
+                advancedTab.revalidate();
+            }
+        });
+    }
+
     private void updateFeeText(){
         try {
             Coin txFee = new Coin(baseUnit);
             txFee.mul(feeSlider.getValue());
             feeValue.setText(txFee.toString());
+            if (set.isFairDonation()) {
+                Coin donation = txFee;
+                if (set.isFairDonationCustomAmount()) {
+                    donation = set.getFairDonationCustom();
+                }
+                donationMessage.setText("You will donate " + donation);
+            } else {
+                donationMessage.setText("");
+            }
         } catch (Exception e) {
         }
 
