@@ -50,7 +50,7 @@ public class main {
                 }
             }
         }
-        Decred binaries = new Decred(set.getRPCUser(), set.getRPCPass(), set.isRPCtls(), set.isTestnet());
+        final Decred binaries = new Decred(set.getRPCUser(), set.getRPCPass(), set.isRPCtls(), set.isTestnet());
         try {
             if (set.isDoAutoUpdate()) {
                 if (SystemUtils.IS_OS_WINDOWS) { //Check if the user wants this if he has the latest Decred binaries and download them if not.
@@ -136,42 +136,63 @@ public class main {
         }
         startScreen.dispose(); //Get rid of the loading screen and show the main window
 
-        Overview window = new Overview(set);
+        final Overview window = new Overview(set, binaries);
         window.setVisible(true);
+        final boolean[] catchingUp = {false};
+        Thread updater = new Thread() {
+            public void run() {
 
-        boolean catchingUp = false;
+                while (binaries.allRunning()) {
+                    try {
+                        long nowBlock;
+                        long maxBlock;
+                        long walletBlock;
+                        int sleeptime = 30000;
+                        if (!catchingUp[0]) {
+                            if (binaries.parseDecred()) {
+                                maxBlock = binaries.getMaxBlock();
+                                nowBlock = settings.getBackend().getBlockCount();
+                                walletBlock = settings.getBackend().getWalletBlockCount();
+                                System.out.println("Catching up: Block " + nowBlock + " of " + maxBlock);
+                                if (maxBlock > nowBlock + 10) {
+                                    catchingUp[0] = true;
+                                }
+                                if (nowBlock > walletBlock + 10) {
+                                    catchingUp[0] = true;
+                                }
+                            }
+                        }
+                        if (catchingUp[0]) {
+                            sleeptime = 200;
+                            maxBlock = binaries.getMaxBlock();
+                            nowBlock = settings.getBackend().getBlockCount();
+                            walletBlock = settings.getBackend().getWalletBlockCount();
+                            window.setStatus("Catching up: Block " + nowBlock + " of " + maxBlock + " (Wallet at " + walletBlock + ")");
+                            if ((maxBlock <= nowBlock) && (nowBlock <= walletBlock + 10)) {
+                                catchingUp[0] = false;
+                                window.resetStatus();
+                                System.out.println("Caught up");
+                            }
+                        }
+                        if (!catchingUp[0]) window.refresh();
+                        Thread.sleep(sleeptime);
+                    } catch (InterruptedException ignored) {
+                    } catch (status status) {
+                    }
+                }
+            }
+        };
 
+        updater.start();
         while (window.isVisible()){ //In the future there might be some background tasks we want to perform here but for the moment, we do nothing.
             try {
-                i++;
-                long nowBlock;
-                long maxBlock;
-                int sleeptime = 30000;
-                if (binaries.parseDecred()) {
-                    maxBlock = binaries.getMaxBlock();
-                    nowBlock = settings.getBackend().getBlockCount();
-                    System.out.println("Catching up: Block " + nowBlock + " of " + maxBlock);
-                    if (maxBlock > nowBlock + 10) {
-                        catchingUp = true;
-                    }
-                }
-                if (catchingUp) {
-                    sleeptime = 100;
-                    maxBlock = binaries.getMaxBlock();
-                    nowBlock = settings.getBackend().getBlockCount();
-                    window.setStatus("Catching up: Block " + nowBlock + " of " + maxBlock);
-                    if (maxBlock == nowBlock) {
-                        catchingUp = false;
-                        window.resetStatus();
-                        System.out.println("Caught up");
-                    }
-                }
-                Thread.sleep(sleeptime);
-                window.refresh();
-            } catch (InterruptedException ignored) {
-            } catch (status status) {
+                Thread.sleep(500);
+            } catch (InterruptedException e) {
             }
         }
         binaries.terminate();
+        while (binaries.decredRunning() || binaries.walletRunning()) {
+        }
+        System.exit(0);
     }
 }
