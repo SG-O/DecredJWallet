@@ -4,13 +4,11 @@
  * Permissions beyond the scope of this license may be available at https://www.sg-o.de/.
  */
 
+import javax.crypto.Cipher;
+import javax.crypto.spec.SecretKeySpec;
 import java.security.MessageDigest;
 import java.util.Arrays;
 import java.util.Base64;
-import javax.crypto.Cipher;
-import javax.crypto.KeyGenerator;
-import javax.crypto.SecretKey;
-import javax.crypto.spec.SecretKeySpec;
 import java.util.prefs.Preferences;
 
 /**
@@ -18,6 +16,8 @@ import java.util.prefs.Preferences;
  * This class stores all the settings, saves them and loads them
  */
 public class settings {
+    private static decredBackend backend;
+    private final Preferences pref = Preferences.userRoot();
     private String RPCUser;
     private String RPCPass;
     private String RPCAddr;
@@ -27,14 +27,11 @@ public class settings {
     private boolean encryption = false;
     private int transactionsToLoade = 100;
     private boolean doAutoUpdate = true;
-
+    private boolean fairDonation = false;
+    private boolean fairDonationCustomAmount = false;
+    private Coin fairDonationCustom = new Coin();
     private long toolsVersion = 0;
-
-    private final Preferences pref = Preferences.userRoot();
-
     private Cipher cipher;
-
-    private static decredBackend backend;
 
     public settings(String RPCUser, String RPCPass, String RPCAddr, boolean testnet, boolean tls, boolean encryption, int transactionsToLoade) {
         this.RPCUser = RPCUser;
@@ -79,6 +76,13 @@ public class settings {
         this.firstrun = pref.getBoolean("DCRDfirstrun", true);
         this.doAutoUpdate = pref.getBoolean("DCRDupdate", true);
         this.toolsVersion = pref.getLong("DCRDtoolsversion", 0l);
+        this.fairDonation = pref.getBoolean("DCRDfairDonation", false);
+        this.fairDonationCustomAmount = pref.getBoolean("DCRDfairDonationCustomAmount", false);
+        try {
+            this.fairDonationCustom = new Coin(pref.getDouble("DCRDfairDonationCustom", 0));
+        } catch (Exception e) {
+        }
+
         if (encryption) {
             DecryptForm decryptf = new DecryptForm();
             while (decryptf.key == null){
@@ -92,15 +96,15 @@ public class settings {
 
     }
 
+    public static decredBackend getBackend() {
+        return backend;
+    }
+
     /**
      * Connect to the backend with the current settings
      */
     public void connect() {
-        backend = new decredBackend(this.RPCUser, this.RPCPass, this.RPCtls, this.RPCAddr, this.testnet);
-    }
-
-    public static decredBackend getBackend() {
-        return backend;
+        backend = new decredBackend(this);
     }
 
     public String getRPCUser() {
@@ -177,6 +181,35 @@ public class settings {
         this.doAutoUpdate = doAutoUpdate;
     }
 
+    public boolean isFairDonation() {
+        return fairDonation;
+    }
+
+    public void setFairDonation(boolean fairDonation) {
+        this.fairDonation = fairDonation;
+    }
+
+    public boolean isFairDonationCustomAmount() {
+        return fairDonationCustomAmount;
+    }
+
+    public void setFairDonationCustomAmount(boolean fairDonationCustomAmount) {
+        this.fairDonationCustomAmount = fairDonationCustomAmount;
+    }
+
+    public Coin getFairDonationCustom() {
+        return fairDonationCustom;
+    }
+
+    public void setFairDonationCustom(Coin fairDonationCustom) {
+        this.fairDonationCustom = fairDonationCustom;
+    }
+
+    public String getDonationAddress() {
+        if (!testnet) return "DshRV5v8XEVpozeEEaZffvtzrfJLqBnYRnX";
+        return "TskQPYijAN2MCmmeymqzpWPQXjbdty8YzJa";
+    }
+
     /**
      * Encrypt the given string with a key using AES
      * @param plain The plaintext to encrypt
@@ -235,15 +268,15 @@ public class settings {
     /**
      * Save the current configuration without encryption
      */
-    public void saveConfig(){
-        saveConfig("");
+    public void savefullConfig() {
+        savefullConfig("");
     }
 
     /**
      * Save the current configuration and encrypt the password
      * @param key They the password should be encrypted with. If this is empty or null no encryption is used.
      */
-    public void saveConfig(String key) {
+    public void savefullConfig(String key) {
         pref.put("RPCUser", this.RPCUser);
         this.encryption = false;
         if (key == null) {
@@ -260,12 +293,19 @@ public class settings {
             }
         }
         pref.putBoolean("DCRDencrypted", this.encryption);
+        saveConfig();
+    }
+
+    public void saveConfig() {
         pref.put("RPCAddr", this.RPCAddr);
         pref.putBoolean("RPCtls", this.RPCtls);
         pref.putBoolean("DCRDtestnet", this.testnet);
         pref.putBoolean("DCRDfirstrun", false);
         pref.putInt("DCRDtransactions", this.transactionsToLoade);
         pref.putBoolean("DCRDupdate", this.doAutoUpdate);
+        pref.putBoolean("DCRDfairDonation", this.fairDonation);
+        pref.putBoolean("DCRDfairDonationCustomAmount", this.fairDonationCustomAmount);
+        pref.putDouble("DCRDfairDonationCustom", this.fairDonationCustom.getAmount());
     }
 
     @Override

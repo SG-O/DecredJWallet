@@ -109,12 +109,12 @@ public class settingsUi extends JDialog{
             return;
         }
         if (!encrypt.isSelected()){
-            set.saveConfig();
+            set.savefullConfig();
         } else if (String.valueOf(encryptpPassword.getPassword()).equals("")){
             new Error("Error", "No encryption password entered!");
             return;
         } else {
-            set.saveConfig(String.valueOf(encryptpPassword.getPassword()));
+            set.savefullConfig(String.valueOf(encryptpPassword.getPassword()));
         }
         if (!wasFirstRun) {
             new Error("Success", "You will have to restart for some of the new settings to take affect!");
