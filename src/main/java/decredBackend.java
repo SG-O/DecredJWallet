@@ -204,6 +204,8 @@ public class decredBackend {
                         throw new status(status.CHECKSUMMISMATCH);
                     if (temp.optJSONObject("error").optString("message").startsWith("-22: TX rejected"))
                         throw new status(status.DOUBLESPEND);
+                    if (temp.optJSONObject("error").optString("message").startsWith("blockchain is currently reorganizing"))
+                        throw new status(status.REORGANIZING);
                     throw new status(status.GENERICERROR);
                 }
                 if (temp.optJSONObject("error").optLong("code") == -13) throw new status(status.LOCKED);
