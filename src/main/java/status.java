@@ -15,6 +15,7 @@ public class status extends Throwable{
     public static final int LOCKED = 4;
     public static final int FUNDS = 5;
     public static final int DOUBLESPEND = 6;
+    public static final int NOADDRESSES = 7;
 
     private int status;
 
@@ -36,6 +37,8 @@ public class status extends Throwable{
             case LOCKED: return "Wallet is locked";
             case FUNDS: return "Insufficient funds";
             case DOUBLESPEND: return "Tried to double spend";
+            case NOADDRESSES:
+                return "No addresses have been created";
             default: return "unknown";
         }
     }
