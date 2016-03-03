@@ -31,7 +31,7 @@ public class main {
         }
         if (set.isDoAutoUpdate()){ //If the user wants this, check for new updates, inform him about any and if wanted update.
             startScreen.setStatus("Checking for updates");
-            if (update.checkUpdates()){
+            if (update.checkUpdates(softwareInfo.getVersion())) {
                 UpdateAvailable uA = new UpdateAvailable("A new Update is available! Do you want to update now?");
                 if (uA.getResult()){
                     if(!update.doUpdate()){

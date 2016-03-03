@@ -4,8 +4,6 @@
  * Permissions beyond the scope of this license may be available at https://www.sg-o.de/.
  */
 
-package update;
-
 import java.util.Properties;
 
 /**
@@ -15,7 +13,7 @@ public class softwareInfo {
     public static long getVersion() {
         try {
             final Properties properties = new Properties();
-            properties.load(softwareInfo.class.getResourceAsStream("../project.properties"));
+            properties.load(softwareInfo.class.getResourceAsStream("project.properties"));
             String version = properties.getProperty("version");
             version = version.replaceAll("\\D+", "");
             long vers = Long.parseLong(version);
