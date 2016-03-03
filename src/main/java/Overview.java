@@ -27,16 +27,19 @@ public class Overview extends JFrame {
     private JPanel transactions;
     private JLabel balance;
     private JLabel statusString;
+    private JLabel currentBlock;
     private JMenuBar menu;
     private JTable table;
     private JScrollPane tableScroll;
     private settings set;
+    private Decred binaries;
 
-    public Overview(final settings set) {
+    public Overview(final settings set, final Decred binaries) {
         setTitle("DecredJWallet");
         setSize(600, 400);
         setMinimumSize(new Dimension(400, 300));
         this.set = set;
+        this.binaries = binaries;
         try {
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
         } catch (Exception e) {
@@ -61,7 +64,7 @@ public class Overview extends JFrame {
         });
         sendFunds.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                new newTransaction();
+                new newTransaction(set);
             }
         });
         getFunds.addActionListener(new ActionListener() {
@@ -114,6 +117,13 @@ public class Overview extends JFrame {
         });
         sub.add(item);
         sub.addSeparator();
+        item = new JMenuItem("Console");
+        item.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                new Console(binaries);
+            }
+        });
+        sub.add(item);
         item = new JMenuItem("Settings");
         item.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
@@ -123,6 +133,23 @@ public class Overview extends JFrame {
         sub.add(item);
         menu.add(sub);
         sub = new JMenu("Help");
+        item = new JMenuItem("Donate");
+        item.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                try {
+                    new newTransaction(set.getDonationAddress(), new Coin(2), set);
+                } catch (Exception e1) {
+                }
+            }
+        });
+        sub.add(item);
+        item = new JMenuItem("Fair Donation");
+        item.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                new FairDonation(set);
+            }
+        });
+        sub.add(item);
         item = new JMenuItem("About");
         item.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
@@ -154,6 +181,7 @@ public class Overview extends JFrame {
         }
         try {
             balanceValue = settings.getBackend().getBalance();
+            currentBlock.setText("Block: " + String.valueOf(settings.getBackend().getWalletBlockCount()));
             unconfirmedBalance = settings.getBackend().getUnconfirmedBalance();
         } catch (status status) {
             System.out.println(status);
