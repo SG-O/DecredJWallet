@@ -14,6 +14,10 @@ public class Coin {
 
     private long amount = 0;
 
+    public Coin() {
+        this.amount = 0;
+    }
+
     public Coin(double amount) throws Exception {
         setAmount(amount);
     }
@@ -28,13 +32,6 @@ public class Coin {
 
     public double getAmount() {
         return ((double) amount / FACTOR);
-    }
-
-    public void setAmount(double amount) throws Exception {
-        long temp = (long) (amount * FACTOR);
-        if (temp > MAX_AMOUNT) throw new SecurityException();
-        if (temp < (-MAX_AMOUNT)) throw new SecurityException();
-        this.amount = temp;
     }
 
     public void setAmount(Coin amount) throws Exception {
@@ -55,6 +52,13 @@ public class Coin {
         setAmount(Double.parseDouble(amount));
     }
 
+    public void setAmount(double amount) throws Exception {
+        long temp = (long) (amount * FACTOR);
+        if (temp > MAX_AMOUNT) throw new SecurityException();
+        if (temp < (-MAX_AMOUNT)) throw new SecurityException();
+        this.amount = temp;
+    }
+
     public long getFixedPointAmount() {
         return amount;
     }
@@ -62,6 +66,10 @@ public class Coin {
     @Override
     public String toString() {
         return String.format("%." + ZEROS + "f", getAmount());
+    }
+
+    public String toPointString() {
+        return toString().replace(",", ".");
     }
 
     @Override

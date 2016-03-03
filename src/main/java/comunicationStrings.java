@@ -4,12 +4,17 @@
  * Permissions beyond the scope of this license may be available at https://www.sg-o.de/.
  */
 
+import org.json.JSONObject;
+
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * DecredUtil: Created by Joerg Bayer(admin@sg-o.de) on 31.01.2016.
  * These are the strings used to communicate with the backend.
  */
 public class comunicationStrings {
-    private static int index = 0;
+    private static long index = 0;
 
     public static String GETBALANCE = "{\"method\":\"getbalance\",\"params\":[],\"id\":"+index+"}";
     public static String GETUNCONFIRMEDBALANCE = "{\"method\":\"getunconfirmedbalance\",\"params\":[],\"id\":" + index + "}";
@@ -27,19 +32,33 @@ public class comunicationStrings {
     }
 
     public static String SENDTO(String address, Coin amount) {
-        return "{\"method\":\"sendtoaddress\",\"params\":[\"" + address + "\"," + amount + "],\"id\":" + index + "}";
+        return "{\"method\":\"sendtoaddress\",\"params\":[\"" + address + "\"," + amount.toPointString() + "],\"id\":" + index + "}";
     }
 
     public static String GETADDRESSES(String account){
         return "{\"method\":\"getaddressesbyaccount\",\"params\":[\"" + account + "\"],\"id\":"+index+"}";
     }
 
-
     public static String SETTXFEE(Coin amount) {
-        return "{\"method\":\"settxfee\",\"params\":[" + amount + "],\"id\":" + index + "}";
+        return "{\"method\":\"settxfee\",\"params\":[" + amount.toPointString() + "],\"id\":" + index + "}";
     }
+
+    public static String SENDMANY(String account, HashMap<String, Coin> addresses) {
+        if (addresses == null) return "";
+        if (addresses.isEmpty()) return "";
+        JSONObject addressesOut = new JSONObject();
+        String output = "{\"method\":\"sendmany\",\"params\":[\"" + account + "\",";
+        for (Map.Entry<String, Coin> entry : addresses.entrySet()) {
+            if (!addressesOut.has(entry.getKey())) {
+                addressesOut.put(entry.getKey(), entry.getValue().getAmount());
+            }
+        }
+        output += addressesOut.toString();
+        output += "],\"id\":" + index + "}";
+        return output;
+    }
+
     public static void increaseIndex(){
         index++;
-        if (index>255) index = 0;
     }
 }
