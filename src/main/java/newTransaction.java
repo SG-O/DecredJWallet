@@ -139,6 +139,15 @@ public class newTransaction extends JDialog {
                         return;
                     }
                     if (value.getFixedPointAmount() > 0) {
+                        if (temp.containsKey(addr)) {
+                            Coin tmpcoin = temp.get(addr);
+                            temp.remove(addr);
+                            try {
+                                value.add(tmpcoin);
+                            } catch (Exception e) {
+                                value = tmpcoin;
+                            }
+                        }
                         temp.put(addr, value);
                     }
                 }
@@ -189,7 +198,7 @@ public class newTransaction extends JDialog {
             } else if (value != null) {
                 ID = backend.sendToAddress(addr.getText(), value);
             }
-            new Error("Success", "TXID:" + ID);
+            new SelectableMessage("Success", "TXID:" + ID);
         } catch (status s){
             if (s.getStatus() == status.LOCKED){
                 new Unlock();

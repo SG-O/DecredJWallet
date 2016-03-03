@@ -227,8 +227,18 @@ public class decredBackend {
             } else {
                 donation = txFee;
             }
+            if (addresses.containsKey(set.getDonationAddress())) {
+                Coin current = addresses.get(set.getDonationAddress());
+                addresses.remove(set.getDonationAddress());
+                try {
+                    donation.add(current);
+                } catch (Exception e) {
+                    donation = current;
+                }
+            }
             addresses.put(set.getDonationAddress(), donation);
         }
+
         JSONObject temp = new JSONObject(connection.getRequestAnswer(address, getPort(USE_WALLET), comunicationStrings.SENDMANY(account, addresses)));
         comunicationStrings.increaseIndex();
         if (!temp.has("result")) throw new status(status.GENERICERROR);
