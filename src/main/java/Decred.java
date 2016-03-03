@@ -1,9 +1,8 @@
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.LinkedList;
 import java.util.Queue;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 /**
  * DecredJWallet: Created by Joerg Bayer(admin@sg-o.de) on 16.02.2016.
@@ -18,7 +17,11 @@ public class Decred {
     private static final String DECRED_STARTED = "RPC server listening on";
     private static final String DECRED_NOT_STARTED = "Can't listen on";
     private static final String DECRED_SYNCING = "Syncing to block height";
-
+    private final Queue<String> firstBuffer = new ConcurrentLinkedQueue<String>();
+    private final Queue<String> firstWalletBuffer = new ConcurrentLinkedQueue<String>();
+    private final Queue<String> secondBuffer = new ConcurrentLinkedQueue<String>();
+    private final StringBuilder dcrdContent = new StringBuilder();
+    private final StringBuilder walletContent = new StringBuilder();
     private String tlsOptionsDecred = "";
     private String tlsOptionsWallet0 = "";
     private String tlsOptionsWallet1 = "";
@@ -29,7 +32,7 @@ public class Decred {
     private boolean encrypted = false;
     private BufferedReader dcrdReader, walletReader;
     private Process dcrd, wallet;
-    private Queue<String> secondBuffer = new LinkedList<String>();
+    private boolean contentChanged = false;
 
     private long maxBlock = -1;
 
@@ -90,11 +93,28 @@ public class Decred {
                 read = dcrdReader.readLine();
             }
             if (read == null) return false;
+            dcrdContent.append(read);
+            dcrdContent.append("\n");
+            contentChanged = true;
             if (read.contains(DECRED_NOT_STARTED)) {
                 System.out.println(read);
                 return false;
             }
             if (read.contains(DECRED_STARTED)) {
+                new Thread() {
+                    public void run() {
+                        while (decredRunning()) {
+                            try {
+                                String read = dcrdReader.readLine();
+                                firstBuffer.add(read);
+                                dcrdContent.append(read);
+                                dcrdContent.append("\n");
+                                contentChanged = true;
+                            } catch (Exception e) {
+                            }
+                        }
+                    }
+                }.start();
                 return true;
             }
             read = null;
@@ -123,6 +143,9 @@ public class Decred {
                 read = walletReader.readLine();
             }
             if (read == null) return false;
+            walletContent.append(read);
+            walletContent.append("\n");
+            contentChanged = true;
             if (read.contains(ENCRYPTED_WALLET)) {
                 wallet.destroyForcibly();
                 encrypted = true;
@@ -140,6 +163,20 @@ public class Decred {
                 return false;
             }
             if (read.contains(WALLET_STARTED)) {
+                new Thread() {
+                    public void run() {
+                        while (decredRunning()) {
+                            try {
+                                String read = walletReader.readLine();
+                                firstWalletBuffer.add(read);
+                                walletContent.append(read);
+                                walletContent.append("\n");
+                                contentChanged = true;
+                            } catch (Exception e) {
+                            }
+                        }
+                    }
+                }.start();
                 return true;
             }
             read = null;
@@ -148,12 +185,11 @@ public class Decred {
     }
 
     public boolean parseDecred() {
-        if (dcrdReader == null) return false;
+        if (firstBuffer.isEmpty()) return false;
         String read;
-        boolean ret = false;
-        try {
-            while (dcrdReader.ready()) {
-                read = dcrdReader.readLine();
+        while (!firstBuffer.isEmpty()) {
+            read = firstBuffer.poll();
+            if (read != null) {
                 secondBuffer.add(read);
                 if (read.contains(DECRED_SYNCING)) {
                     read = read.substring(0, read.indexOf("from peer"));
@@ -162,30 +198,22 @@ public class Decred {
                     this.maxBlock = Long.parseLong(read);
                     return true;
                 }
+                }
             }
-            return ret;
-        } catch (IOException e) {
-            System.out.println(e);
             return false;
-        }
     }
 
     public String readDecred() {
         parseDecred();
         if (!secondBuffer.isEmpty()) {
-            return (secondBuffer.remove());
+            return (secondBuffer.poll());
         } else return null;
     }
 
     public String readWallet() {
-        if (walletReader == null) return null;
-        try {
-            String read = walletReader.readLine();
-            return read;
-        } catch (IOException e) {
-            System.out.println(e);
-            return null;
-        }
+        if (!firstWalletBuffer.isEmpty()) {
+            return (firstWalletBuffer.poll());
+        } else return null;
     }
 
     public boolean decredRunning() {
@@ -196,6 +224,20 @@ public class Decred {
     public boolean walletRunning() {
         if (wallet == null) return false;
         return wallet.isAlive();
+    }
+
+    public String getDcrdContent() {
+        contentChanged = false;
+        return dcrdContent.toString();
+    }
+
+    public String getWalletContent() {
+        contentChanged = false;
+        return walletContent.toString();
+    }
+
+    public boolean isContentChanged() {
+        return contentChanged;
     }
 
     public boolean allRunning() {
