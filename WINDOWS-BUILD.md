@@ -47,7 +47,20 @@ DecredJWallet > src > main > java
 
 and open main in that folder with a double click.
 
+If you see a yellow warning on top of the source code area saying that the Project SDK is not defined do the following:
+
+    Click on setup SDK
+    Click on Configure
+    Click in + > JDK
+    In the Dialog navigate to where you have installed JDK 
+        (Default "C:\Program Files\Java\jdk1.8.0" or C:\Program Files (x86)\Java\jdk1.8.0)
+    Click on OK
+    Click again on OK
+    And again click on OK
+
 Chose Run... under the menu Run and in the dialog that opened click on main.
+
+If you are being asked to add something to the reposatory decline.
 
 Now DecredJWallet should run for the first time. You might be asked to download the binaries and you should do so.
 
