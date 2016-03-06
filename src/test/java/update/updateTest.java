@@ -15,28 +15,12 @@ import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.StringSelection;
 import java.io.File;
 
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 /**
  * DecredUtil: Created by Joerg Bayer(admin@sg-o.de) on 06.02.2016.
  */
 public class updateTest {
-
-    @Test
-    public void testCheckUpdates() throws Exception {
-        assertFalse(update.checkUpdates(9999999));
-    }
-
-    @Test
-    public void testDoUpdate() throws Exception {
-        assertTrue(update.doUpdate(update.DCRDWIN32_URL));
-    }
-
-    @Test
-    public void testCeckSignature() throws Exception {
-        assertTrue(update.checkSignature("Test", "Jxx69MVpEyCbn7c0IRmJeqTkaw9miaFT94dTOKdbhdHLsi3tvHndLR6sEwNm/mdNILPD+MdyaVF8y7DkPcWPzA2k1vvP/u/aZArHyL0PtUnZGsO0z/gYD9egIfOy4yv7jYbf9/SSbefrAqgmB4sCU+CsUtTK6mNnFXrx4FWBXi3yIQmjiKxHpp2I5+AN51RFKNbLuN4r6u1fzkK5yPZb4CZqLDiJnoZq5/VVqLMjya46FaRGEJE1pqwI7zEZTL2UNMlUnJUn0g4YE0607yh8RI3GHzFbFOdiyI7OXX3V4eM/yudKAuvVcC27/YuheYWdeaVOaxKyD3qXLJLSNFYdAw=="));
-    }
 
     @Test
     public void buildToolsUpdate() throws Exception {
@@ -81,7 +65,6 @@ public class updateTest {
         StringSelection selection = new StringSelection(obj.toString());
         Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
         clipboard.setContents(selection, selection);
-        assertTrue(update.checkSignature(message,sig));
     }
 
     @Test
@@ -125,7 +108,6 @@ public class updateTest {
         StringSelection selection = new StringSelection(obj.toString());
         Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
         clipboard.setContents(selection, selection);
-        assertTrue(update.checkSignature(message,sig));
     }
 
     @Test
