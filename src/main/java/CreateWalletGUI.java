@@ -6,11 +6,11 @@
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import java.awt.*;
 import java.awt.event.*;
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.util.Arrays;
 
 /**
@@ -20,24 +20,30 @@ public class CreateWalletGUI extends JDialog{
     private JButton ok;
     private JButton cancel;
     private JCheckBox useSeed;
-    private JTextArea seed;
+    private JTextArea seedInput;
     private JPasswordField walletPassword;
     private JPasswordField walletPasswordRepeat;
     private JCheckBox securePublic;
     private JPasswordField publicPassword;
     private JPasswordField publicPasswordRepeat;
     private JPanel contentPane;
+    private JSlider strengthSlider;
+    private JLabel strength;
+    private JLabel strengthLabel;
+    private JLabel strengthLabelWeaker;
+    private JLabel strengthLabelStronger;
 
     public CreateWalletGUI() {
         setContentPane(contentPane);
         setTitle("Transaction Details");
         setModal(true);
+        setAlwaysOnTop(true);
         try {
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
         } catch (Exception e) {
         }
-        seed.setVisible(false);
-
+        seedInput.setVisible(false);
+        strengthSlider.setValue(256);
         try {
             setIconImage(ImageIO.read(ClassLoader.getSystemResource("favicon.png")));
         } catch (IOException e) {
@@ -46,12 +52,23 @@ public class CreateWalletGUI extends JDialog{
         useSeed.addItemListener(new ItemListener() {
             public void itemStateChanged(ItemEvent e) {
                 if (useSeed.isSelected()){
-                    seed.setEnabled(true);
-                    seed.setVisible(true);
+                    seedInput.setEnabled(true);
+                    seedInput.setVisible(true);
+                    strengthSlider.setEnabled(false);
+                    strength.setEnabled(false);
+                    strengthLabel.setEnabled(false);
+                    strengthLabelWeaker.setEnabled(false);
+                    strengthLabelStronger.setEnabled(false);
                 } else {
-                    seed.setEnabled(false);
-                    seed.setVisible(false);
-                    seed.setText("");
+                    seedInput.setEnabled(false);
+                    seedInput.setVisible(false);
+                    strengthSlider.setEnabled(true);
+                    strengthSlider.setValue(256);
+                    strength.setEnabled(true);
+                    strengthLabel.setEnabled(true);
+                    strengthLabelWeaker.setEnabled(true);
+                    strengthLabelStronger.setEnabled(true);
+                    seedInput.setText("");
                 }
             }
         });
@@ -73,9 +90,16 @@ public class CreateWalletGUI extends JDialog{
                 }
             }
         });
+
+        strengthSlider.addChangeListener(new ChangeListener() {
+            public void stateChanged(ChangeEvent e) {
+                strength.setText(String.valueOf((strengthSlider.getValue() / 8) * 8));
+            }
+        });
+
         contentPane.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
-        setMinimumSize(new Dimension(550, 400));
-        setSize(600,400);
+        setMinimumSize(new Dimension(600, 450));
+        setSize(600, 450);
         getRootPane().setDefaultButton(ok);
 
         ok.addActionListener(new ActionListener() {
@@ -120,6 +144,11 @@ public class CreateWalletGUI extends JDialog{
             return;
         }
 
+        if (walletPassword.getPassword().length < 8) {
+            new Error("Error", "Wallet password not strong enough! Enter more than 8 characters.");
+            return;
+        }
+
         if (securePublic.isSelected() && (!Arrays.equals(publicPassword.getPassword(), publicPasswordRepeat.getPassword()))){
             new Error("Error", "Public wallet encryption passwords don't match!");
             return;
@@ -130,22 +159,45 @@ public class CreateWalletGUI extends JDialog{
             return;
         }
 
-        if (useSeed.isSelected() && seed.getText().equals("")){
-            new Error("Error", "Please enter the seed to use or uncheck that you want to use your own seed!");
+        if (useSeed.isSelected() && seedInput.getText().equals("")) {
+            new Error("Error", "Please enter the seed you want to use or generate a new one by specifying that you don't want to use your own seed!");
             return;
         }
-
-        try {
-            Process test = Runtime.getRuntime().exec("dcrwallet --create");
-            BufferedReader error = new BufferedReader(new InputStreamReader(test.getErrorStream()));
-            test.waitFor();
-            System.out.println(error.readLine());
-
-        } catch (Exception e) {
-            e.printStackTrace();
+        seed walletSeed = null;
+        if (useSeed.isSelected()) {
+            try {
+                walletSeed = new seed(seedInput.getText().replace("\n", "").replace("\r", ""), true);
+            } catch (seedException e) {
+                if (e.getException() == seedException.EMPTY_SEED) {
+                    new Error("Error", "Please enter the seed you want to use or generate a new one by specifying that you don't want to use your own seed!");
+                    return;
+                }
+                if (e.getException() == seedException.INVALID_WORD) {
+                    new Error("Error", "Invalid word \"" + e.getFirstStatus() + "\" found!");
+                    return;
+                }
+                if (e.getException() == seedException.INVALID_HASH) {
+                    new Error("Error", "Invalid checksum \"" + e.getFirstStatus() + "\" found! The expected value is \"" + e.getSecondStatus() + ".");
+                    return;
+                }
+                if (e.getException() == seedException.PGP_WORDLIST_NOT_LOADED) {
+                    new Error("Error", "Error loading PGP word list! Exiting now.");
+                    System.exit(0);
+                }
+            }
+        } else {
+            walletSeed = new seed(strengthSlider.getValue());
         }
-
-
+        if (walletSeed == null) return;
+        try {
+            new seedBackup(walletSeed.toHashedPGP());
+        } catch (seedException e) {
+            if (e.getException() == seedException.PGP_WORDLIST_NOT_LOADED) {
+                new Error("Error", "Error loading PGP word list! Exiting now.");
+                System.exit(0);
+            }
+            return;
+        }
         dispose();
     }
 }
