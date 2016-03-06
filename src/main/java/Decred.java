@@ -11,10 +11,10 @@ public class Decred {
     private static final String ENCRYPTED_WALLET = "invalid passphrase for master public key";
     private static final String WALLET_MISSING = "The wallet does not exist";
     private static final String WALLET_NOT_STARTED = "Can't listen on";
-    private static final String WALLET_STARTED = "RPC server listening";
+    private static final String WALLET_STARTED = "istening on";
     private static final String WALLET_WRONG_PASSWORD = "invalid passphrase for master public key";
 
-    private static final String DECRED_STARTED = "RPC server listening on";
+    private static final String DECRED_STARTED = "istening on";
     private static final String DECRED_NOT_STARTED = "Can't listen on";
     private static final String DECRED_SYNCING = "Syncing to block height";
     private final Queue<String> firstBuffer = new ConcurrentLinkedQueue<String>();
