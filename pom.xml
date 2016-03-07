@@ -64,7 +64,7 @@
     </dependencyManagement>
     <groupId>de.sg-o.app</groupId>
     <artifactId>DecredUtil</artifactId>
-    <version>0.6-ALPHA</version>
+    <version>0.7-ALPHA</version>
     <build>
         <resources>
             <resource>
