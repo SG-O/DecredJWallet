@@ -27,7 +27,7 @@ public class Updating extends JDialog {
                 onOK();
             }
         });
-
+        setAlwaysOnTop(true);
         try {
             setIconImage(ImageIO.read(ClassLoader.getSystemResource("favicon.png")));
         } catch (IOException e) {
