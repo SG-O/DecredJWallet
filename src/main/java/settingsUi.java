@@ -26,6 +26,8 @@ public class settingsUi extends JDialog{
     private JPanel contentPane;
     private JTextField transac;
     private JCheckBox autoUpdate;
+    private JTextField updateUrl;
+    private JTextField binariesUrl;
 
     private settings set;
 
@@ -45,8 +47,8 @@ public class settingsUi extends JDialog{
 
         this.set = set;
         contentPane.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
-        setMinimumSize(new Dimension(400, 350));
-        setSize(400,350);
+        setMinimumSize(new Dimension(500, 400));
+        setSize(500, 400);
         getRootPane().setDefaultButton(ok);
 
         ok.addActionListener(new ActionListener() {
@@ -102,6 +104,8 @@ public class settingsUi extends JDialog{
         set.setDoAutoUpdate(autoUpdate.isSelected());
         set.setTestnet(testnet.isSelected());
         set.setRPCtls(tls.isSelected());
+        set.setCustomUpdateUrl(updateUrl.getText());
+        set.setCustomBinariesUrl(binariesUrl.getText());
         try{
             set.setTransactionsToLoade(Integer.parseInt(transac.getText()));
         } catch (Exception e){
@@ -136,6 +140,8 @@ public class settingsUi extends JDialog{
         encrypt.setSelected(set.isEncryption());
         transac.setText(String.valueOf(set.getTransactionsToLoad()));
         autoUpdate.setSelected(set.isDoAutoUpdate());
+        updateUrl.setText(set.getCustomUpdateUrl());
+        binariesUrl.setText(set.getCustomBinariesUrl());
         if (set.isEncryption()){
             encryptpPassword.setEnabled(true);
             encryptpPassword.setEditable(true);

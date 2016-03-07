@@ -29,8 +29,10 @@ public class settings {
     private boolean doAutoUpdate = true;
     private boolean fairDonation = false;
     private boolean fairDonationCustomAmount = false;
+    private String customUpdateUrl = "";
+    private String customBinariesUrl = "";
     private Coin fairDonationCustom = new Coin();
-    private long toolsVersion = 0;
+
     private Cipher cipher;
 
     public settings(String RPCUser, String RPCPass, String RPCAddr, boolean testnet, boolean tls, boolean encryption, int transactionsToLoade) {
@@ -75,9 +77,10 @@ public class settings {
         this.encryption = pref.getBoolean("DCRDencrypted", false);
         this.firstrun = pref.getBoolean("DCRDfirstrun", true);
         this.doAutoUpdate = pref.getBoolean("DCRDupdate", true);
-        this.toolsVersion = pref.getLong("DCRDtoolsversion", 0l);
         this.fairDonation = pref.getBoolean("DCRDfairDonation", false);
         this.fairDonationCustomAmount = pref.getBoolean("DCRDfairDonationCustomAmount", false);
+        this.customUpdateUrl = pref.get("DCRDcustomUpdateUrl", "");
+        this.customBinariesUrl = pref.get("DCRDcustomBinariesUrl", "");
         try {
             this.fairDonationCustom = new Coin(pref.getDouble("DCRDfairDonationCustom", 0));
         } catch (Exception e) {
@@ -112,7 +115,7 @@ public class settings {
     }
 
     public void setRPCUser(String RPCUser) {
-        this.RPCUser = RPCUser;
+        this.RPCUser = RPCUser.trim();
     }
 
     public String getRPCPass() {
@@ -128,7 +131,7 @@ public class settings {
     }
 
     public void setRPCAddr(String RPCAddr) {
-        this.RPCAddr = RPCAddr;
+        this.RPCAddr = RPCAddr.trim();
     }
 
     public boolean isTestnet() {
@@ -158,15 +161,6 @@ public class settings {
     public int getTransactionsToLoad() {
         if (transactionsToLoade < 1) transactionsToLoade = 1;
         return transactionsToLoade;
-    }
-
-    public long getToolsVersion() {
-        return toolsVersion;
-    }
-
-    public void setToolsVersion(long toolsVersion) {
-        this.toolsVersion = toolsVersion;
-        pref.putLong("DCRDtoolsversion", toolsVersion);
     }
 
     public void setTransactionsToLoade(int transactionsToLoade) {
@@ -203,6 +197,32 @@ public class settings {
 
     public void setFairDonationCustom(Coin fairDonationCustom) {
         this.fairDonationCustom = fairDonationCustom;
+    }
+
+    public String getCustomUpdateUrl() {
+        return customUpdateUrl;
+    }
+
+    public boolean isCustomUpdateUrl() {
+        if (customUpdateUrl == null) return false;
+        return !customUpdateUrl.isEmpty();
+    }
+
+    public void setCustomUpdateUrl(String customUpdateUrl) {
+        this.customUpdateUrl = customUpdateUrl.trim();
+    }
+
+    public String getCustomBinariesUrl() {
+        return customBinariesUrl;
+    }
+
+    public boolean isCustomBinariesUrl() {
+        if (customBinariesUrl == null) return false;
+        return !customBinariesUrl.isEmpty();
+    }
+
+    public void setCustomBinariesUrl(String customBinariesUrl) {
+        this.customBinariesUrl = customBinariesUrl;
     }
 
     public String getDonationAddress() {
@@ -306,6 +326,8 @@ public class settings {
         pref.putBoolean("DCRDfairDonation", this.fairDonation);
         pref.putBoolean("DCRDfairDonationCustomAmount", this.fairDonationCustomAmount);
         pref.putDouble("DCRDfairDonationCustom", this.fairDonationCustom.getAmount());
+        pref.put("DCRDcustomUpdateUrl", this.customUpdateUrl);
+        pref.put("DCRDcustomBinariesUrl", this.customBinariesUrl);
     }
 
     @Override

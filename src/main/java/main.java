@@ -5,7 +5,6 @@
  */
 
 import org.apache.commons.lang3.SystemUtils;
-import update.update;
 
 import java.io.File;
 
@@ -31,10 +30,11 @@ public class main {
         }
         if (set.isDoAutoUpdate()){ //If the user wants this, check for new updates, inform him about any and if wanted update.
             startScreen.setStatus("Checking for updates");
-            if (update.checkUpdates(softwareInfo.getVersion())) {
+            updateWrapper upd = new updateWrapper(updateWrapper.MAIN_UPDATE, set);
+            if (upd.updateAvailable(softwareInfo.getVersion())) {
                 UpdateAvailable uA = new UpdateAvailable("A new Update is available! Do you want to update now?");
                 if (uA.getResult()){
-                    if(!update.doUpdate()){
+                    if (!upd.run()) {
                         new Error("Error", "Could not Update! Please try again.");
                     }
                 }
@@ -44,7 +44,8 @@ public class main {
             if ((!(new File("dcrd.exe")).exists())||(!(new File("dcrwallet.exe")).exists())){
                 UpdateAvailable uA = new UpdateAvailable("Decred is not installed do you want to download it now?");
                 if (uA.getResult()){
-                    if(!update.getTools()){
+                    updateWrapper upd = new updateWrapper(updateWrapper.TOOLS_UPDATE, set);
+                    if (!upd.run()) {
                         new Error("Error", "Could not Update! Please try again.");
                     }
                 }
@@ -54,14 +55,12 @@ public class main {
         try {
             if (set.isDoAutoUpdate()) {
                 if (SystemUtils.IS_OS_WINDOWS) { //Check if the user wants this if he has the latest Decred binaries and download them if not.
-                    long uT = update.checkTools();
-                    if (((long) binaries.checkVersion()) < uT) {
+                    updateWrapper upd = new updateWrapper(updateWrapper.TOOLS_UPDATE, set);
+                    if (upd.updateAvailable((long) binaries.checkVersion())) {
                         UpdateAvailable uA = new UpdateAvailable("Decred binaries are out of date! Update now?");
                         if (uA.getResult()) {
-                            if (!update.getTools()) {
+                            if (!upd.run()) {
                                 new Error("Error", "Could not Update! Please try again.");
-                            } else {
-                                set.setToolsVersion(uT);
                             }
                         }
                     }

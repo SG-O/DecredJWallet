@@ -17,15 +17,21 @@ public class updateWrapper {
     private int type;
     private update.update upd = null;
 
-    public updateWrapper(int type) {
+    public updateWrapper(int type, settings set) {
         this.type = type;
         String url;
         switch (type) {
             case TOOLS_UPDATE:
                 url = getTools();
+                if (set.isCustomBinariesUrl()) {
+                    url = set.getCustomBinariesUrl();
+                }
                 break;
             default:
                 url = UPDATE_URL;
+                if (set.isCustomUpdateUrl()) {
+                    url = set.getCustomUpdateUrl();
+                }
                 break;
         }
 
