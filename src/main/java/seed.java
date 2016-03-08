@@ -1,7 +1,8 @@
 import internal.hex;
-import internal.pgp;
 import org.json.JSONArray;
 
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
 import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.security.SecureRandom;
@@ -11,7 +12,7 @@ import java.util.HashMap;
  * DecredJWallet: Created by Joerg Bayer(admin@sg-o.de) on 04.03.2016.
  */
 public class seed {
-    final protected static JSONArray pgpwl = pgp.getWordList();
+    final protected static JSONArray pgpwl = getWordList();
 
     private BigInteger internalSeed;
 
@@ -73,6 +74,22 @@ public class seed {
         byte bytes[] = new byte[byteLength];
         random.nextBytes(bytes);
         this.internalSeed = new BigInteger(bytes);
+    }
+
+    public static JSONArray getWordList() {
+        BufferedReader inputStream = new BufferedReader(new InputStreamReader(seed.class.getResourceAsStream("pgpwl.json")));
+        StringBuilder builder = new StringBuilder();
+        String read;
+        try {
+            while ((read = inputStream.readLine()) != null) {
+                builder.append(read);
+            }
+            JSONArray tmpArray = new JSONArray(builder.toString());
+            if (tmpArray.length() != 256) return null;
+            return tmpArray;
+        } catch (Exception e) {
+            return null;
+        }
     }
 
     public BigInteger getSeed() {
