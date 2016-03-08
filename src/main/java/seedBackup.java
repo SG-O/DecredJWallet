@@ -23,6 +23,7 @@ public class seedBackup extends JDialog {
         getRootPane().setDefaultButton(ok);
         setMinimumSize(contentPanel.getMinimumSize());
         setMaximumSize(contentPanel.getMaximumSize());
+        seedText.setWrapStyleWord(true);
         seedText.setText(txt);
         seedText.addFocusListener(new FocusListener() {
             public void focusGained(FocusEvent e) {
