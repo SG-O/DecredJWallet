@@ -24,14 +24,14 @@ public class updateTest {
 
     @Test
     public void buildToolsUpdate() throws Exception {
-        String type = "w32";
+        String type = "w64";
         String URL;
         String Relative;
         if (type.equals("w64")) {
-            URL = "https://github.com/decred/decred-release/releases/download/v0.0.5/windows-amd64-20160226-01.zip";
+            URL = "https://github.com/decred/decred-release/releases/download/v0.0.6/windows-amd64-20160304-01.zip";
             Relative = "windows-amd64";
         } else if (type.equals("w32")) {
-            URL = "https://github.com/decred/decred-release/releases/download/v0.0.5/windows-386-20160226-01.zip";
+            URL = "https://github.com/decred/decred-release/releases/download/v0.0.6/windows-386-20160304-01.zip";
             Relative = "windows-386";
         } else return;
         File temp = File.createTempFile("dcrd", Long.toString(System.nanoTime()));
@@ -69,7 +69,7 @@ public class updateTest {
 
     @Test
     public void buildMainUpdate() throws Exception {
-        String URL = "http://sg-o.de/upd/V6/DecredJWallet.jar";
+        String URL = "http://sg-o.de/upd/V7/DecredJWallet.jar";
         String Updater = "https://github.com/SG-O/DcrdJGUIUpdater/releases/download/0.1/DcrdUpdater.jar";
         String RelativeURL = "DecredJWallet.jar.update";
         String RelativeUpdater = "DcrdUpdater.jar";
