@@ -1,7 +1,7 @@
+import internal.hex;
+import internal.pgp;
 import org.json.JSONArray;
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
 import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.security.SecureRandom;
@@ -11,8 +11,7 @@ import java.util.HashMap;
  * DecredJWallet: Created by Joerg Bayer(admin@sg-o.de) on 04.03.2016.
  */
 public class seed {
-    final protected static char[] hexArray = "0123456789ABCDEF".toCharArray();
-    final protected static JSONArray pgpwl = getWordList();
+    final protected static JSONArray pgpwl = pgp.getWordList();
 
     private BigInteger internalSeed;
 
@@ -57,7 +56,7 @@ public class seed {
                 }
             }
         } else {
-            this.internalSeed = new BigInteger(hexToBytes(seedString));
+            this.internalSeed = new BigInteger(hex.hexToBytes(seedString));
         }
     }
 
@@ -76,49 +75,13 @@ public class seed {
         this.internalSeed = new BigInteger(bytes);
     }
 
-    public static String bytesToHex(byte[] bytes) {
-        char[] hexChars = new char[bytes.length * 2];
-        for (int i = 0; i < bytes.length; i++) {
-            int v = bytes[i] & 0xFF;
-            hexChars[i * 2] = hexArray[v >>> 4];
-            hexChars[i * 2 + 1] = hexArray[v & 0x0F];
-        }
-        return new String(hexChars);
-    }
-
-    public static byte[] hexToBytes(String s) {
-        int len = s.length();
-        byte[] data = new byte[len / 2];
-        for (int i = 0; i < len; i += 2) {
-            data[i / 2] = (byte) ((Character.digit(s.charAt(i), 16) << 4)
-                    + Character.digit(s.charAt(i + 1), 16));
-        }
-        return data;
-    }
-
-    private static JSONArray getWordList() {
-        BufferedReader inputStream = new BufferedReader(new InputStreamReader(seed.class.getResourceAsStream("pgpwl.json")));
-        StringBuilder builder = new StringBuilder();
-        String read;
-        try {
-            while ((read = inputStream.readLine()) != null) {
-                builder.append(read);
-            }
-            JSONArray tmpArray = new JSONArray(builder.toString());
-            if (tmpArray.length() != 256) return null;
-            return tmpArray;
-        } catch (Exception e) {
-            return null;
-        }
-    }
-
     public BigInteger getSeed() {
         return internalSeed;
     }
 
     @Override
     public String toString() {
-        return bytesToHex(internalSeed.toByteArray());
+        return hex.bytesToHex(internalSeed.toByteArray());
     }
 
     public BigInteger hash() throws seedException {
