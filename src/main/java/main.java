@@ -4,8 +4,6 @@
  * Permissions beyond the scope of this license may be available at https://www.sg-o.de/.
  */
 
-import org.apache.commons.lang3.SystemUtils;
-
 import java.io.File;
 
 /**
@@ -40,8 +38,9 @@ public class main {
                 }
             }
         }
-        if (SystemUtils.IS_OS_WINDOWS){ //If the user is running windows and does not already have the Decred binaries installed, offer the user the option to download them.
-            if ((!(new File("dcrd.exe")).exists())||(!(new File("dcrwallet.exe")).exists())){
+        final Decred binaries = new Decred(set.getRPCUser(), set.getRPCPass(), set.isRPCtls(), set.isTestnet());
+        if (updateWrapper.updatableOS(updateWrapper.TOOLS_UPDATE, set)) { //If the user is running an updatable os and does not already have the Decred binaries installed, offer the user the option to download them.
+            if (!binaries.checkFiles()) {
                 UpdateAvailable uA = new UpdateAvailable("Decred is not installed do you want to download it now?");
                 if (uA.getResult()){
                     updateWrapper upd = new updateWrapper(updateWrapper.TOOLS_UPDATE, set);
@@ -51,10 +50,9 @@ public class main {
                 }
             }
         }
-        final Decred binaries = new Decred(set.getRPCUser(), set.getRPCPass(), set.isRPCtls(), set.isTestnet());
         try {
             if (set.isDoAutoUpdate()) {
-                if (SystemUtils.IS_OS_WINDOWS) { //Check if the user wants this if he has the latest Decred binaries and download them if not.
+                if (updateWrapper.updatableOS(updateWrapper.TOOLS_UPDATE, set)) { //Check if the user wants this,if he has the latest Decred binaries and download them if not.
                     updateWrapper upd = new updateWrapper(updateWrapper.TOOLS_UPDATE, set);
                     if (upd.updateAvailable((long) binaries.checkVersion())) {
                         UpdateAvailable uA = new UpdateAvailable("Decred binaries are out of date! Update now?");
@@ -87,6 +85,7 @@ public class main {
                 }
             }
         } catch (Exception e){
+            System.out.println(e);
             new Error("Error", "Decred executables not found!");
             binaries.terminate();
             startScreen.dispose();
