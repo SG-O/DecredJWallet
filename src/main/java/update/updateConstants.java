@@ -14,4 +14,5 @@ public class updateConstants {
     public static final int MOVE = 2;
     public static final int UNZIP = 3;
     public static final int EXECUTE = 4;
+    public static final int UNTARGZ = 5;
 }

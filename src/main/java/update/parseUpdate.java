@@ -38,6 +38,8 @@ public class parseUpdate {
                 return new unzipUpdateItem(command.getString("ID"), tempdir, command.optString("relativeSource", ""), command.optString("relativeDest", ""));
             case updateConstants.EXECUTE:
                 return new executeUpdateItem(command.getString("ID"));
+            case updateConstants.UNTARGZ:
+                return new unTarGzUpdateItem(command.getString("ID"), tempdir, command.optString("relativeSource", ""), command.optString("relativeDest", ""));
             default:
                 return  new dummyUpdateItem();
         }
