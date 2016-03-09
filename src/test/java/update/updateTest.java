@@ -23,7 +23,53 @@ import static org.junit.Assert.assertTrue;
 public class updateTest {
 
     @Test
-    public void buildToolsUpdate() throws Exception {
+    public void buildOtherToolsUpdate() throws Exception {
+        String type = "larm";
+        String URL;
+        String Relative;
+        if (type.equals("l64")) {
+            URL = "https://github.com/decred/decred-release/releases/download/v0.0.6/linux-amd64-20160304-01.tar.gz";
+            Relative = "linux-amd64";
+        } else if (type.equals("l32")) {
+            URL = "https://github.com/decred/decred-release/releases/download/v0.0.6/linux-386-20160304-01.tar.gz";
+            Relative = "linux-386";
+        } else if (type.equals("larm")) {
+            URL = "https://github.com/decred/decred-release/releases/download/v0.0.6/linux-arm-20160304-01.tar.gz";
+            Relative = "linux-arm";
+        } else return;
+        File temp = File.createTempFile("dcrd", Long.toString(System.nanoTime()));
+        if (!(temp.delete())) {
+            System.out.println("Could not create temp dir");
+            assertTrue(false);
+            return;
+        }
+
+        if (!(temp.mkdir())) {
+            System.out.println("Could not create temp dir");
+            assertTrue(false);
+            return;
+        }
+        downloadUpdateItem tmpDow = new downloadUpdateItem("generatedown.tmp", URL, temp, "");
+        System.out.println("Downloading...");
+        tmpDow.execute();
+        System.out.println("Hashing");
+        String hashResult = downloadUpdateItem.hash(new File(temp, "generatedown.tmp"));
+        temp.delete();
+        String message = "[{\"ID\":\"dcrd.tar.gz\",\"type\":" + updateConstants.DOWNLOAD + ",\"url\":\"" + URL + "\",\"hash\":\"" + hashResult + "\"},{\"ID\":\"dcrd.tar.gz\",\"type\":" + updateConstants.UNTARGZ + "},{\"relativeSource\":\"\",\"ID\":\"" + Relative + "\",\"type\":" + updateConstants.MOVE + "}]";
+        String sig = update.signString(message, "D:\\key.der");
+        JSONArray tmpMes = new JSONArray(message);
+        JSONObject obj = new JSONObject();
+        obj.put("Commands", tmpMes);
+        obj.put("Signature", sig);
+        System.out.println("Output:");
+        System.out.println(obj);
+        StringSelection selection = new StringSelection(obj.toString());
+        Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+        clipboard.setContents(selection, selection);
+    }
+
+    @Test
+    public void buildWindowsToolsUpdate() throws Exception {
         String type = "w64";
         String URL;
         String Relative;
@@ -35,26 +81,24 @@ public class updateTest {
             Relative = "windows-386";
         } else return;
         File temp = File.createTempFile("dcrd", Long.toString(System.nanoTime()));
-        if(!(temp.delete()))
-        {
+        if (!(temp.delete())) {
             System.out.println("Could not create temp dir");
             assertTrue(false);
             return;
         }
 
-        if(!(temp.mkdir()))
-        {
+        if (!(temp.mkdir())) {
             System.out.println("Could not create temp dir");
             assertTrue(false);
             return;
         }
-        downloadUpdateItem tmpDow = new downloadUpdateItem("generatedown.tmp",URL, temp,"");
+        downloadUpdateItem tmpDow = new downloadUpdateItem("generatedown.tmp", URL, temp, "");
         System.out.println("Downloading...");
         tmpDow.execute();
         System.out.println("Hashing");
         String hashResult = downloadUpdateItem.hash(new File(temp, "generatedown.tmp"));
         temp.delete();
-        String message = "[{\"ID\":\"dcrd.zip\",\"type\":1,\"url\":\""+ URL +"\",\"hash\":\"" + hashResult + "\"},{\"ID\":\"dcrd.zip\",\"type\":3},{\"relativeSource\":\"\",\"ID\":\""+Relative+"\",\"type\":2}]";
+        String message = "[{\"ID\":\"dcrd.zip\",\"type\":1,\"url\":\"" + URL + "\",\"hash\":\"" + hashResult + "\"},{\"ID\":\"dcrd.zip\",\"type\":3},{\"relativeSource\":\"\",\"ID\":\"" + Relative + "\",\"type\":2}]";
         String sig = update.signString(message, "D:\\key.der");
         JSONArray tmpMes = new JSONArray(message);
         JSONObject obj = new JSONObject();
@@ -74,30 +118,28 @@ public class updateTest {
         String RelativeURL = "DecredJWallet.jar.update";
         String RelativeUpdater = "DcrdUpdater.jar";
         File temp = File.createTempFile("dcrd", Long.toString(System.nanoTime()));
-        if(!(temp.delete()))
-        {
+        if (!(temp.delete())) {
             System.out.println("Could not create temp dir");
             assertTrue(false);
             return;
         }
 
-        if(!(temp.mkdir()))
-        {
+        if (!(temp.mkdir())) {
             System.out.println("Could not create temp dir");
             assertTrue(false);
             return;
         }
-        downloadUpdateItem tmpDow = new downloadUpdateItem("generatedown1.tmp",URL, temp,"");
+        downloadUpdateItem tmpDow = new downloadUpdateItem("generatedown1.tmp", URL, temp, "");
         System.out.println("Downloading1...");
         tmpDow.execute();
-        tmpDow = new downloadUpdateItem("generatedown2.tmp",Updater, temp,"");
+        tmpDow = new downloadUpdateItem("generatedown2.tmp", Updater, temp, "");
         System.out.println("Downloading2...");
         tmpDow.execute();
         System.out.println("Hashing");
         String hashResult1 = downloadUpdateItem.hash(new File(temp, "generatedown1.tmp"));
         String hashResult2 = downloadUpdateItem.hash(new File(temp, "generatedown2.tmp"));
         temp.delete();
-        String message = "[{\"ID\":\""+RelativeURL+"\",\"type\":1,\"url\":\""+ URL +"\",\"hash\":\"" + hashResult1 + "\"},{\"ID\":\""+RelativeUpdater+"\",\"type\":1,\"url\":\"" + Updater +"\",\"hash\":\""+hashResult2+"\"},{\"relativeSource\":\"\",\"ID\":\""+RelativeURL+"\",\"relativeDest\":\""+RelativeURL+"\",\"type\":2},{\"relativeSource\":\"\",\"ID\":\""+RelativeUpdater+"\",\"relativeDest\":\""+RelativeUpdater+"\",\"type\":2},{\"ID\":\""+RelativeUpdater+"\",\"type\":4}]";
+        String message = "[{\"ID\":\"" + RelativeURL + "\",\"type\":1,\"url\":\"" + URL + "\",\"hash\":\"" + hashResult1 + "\"},{\"ID\":\"" + RelativeUpdater + "\",\"type\":1,\"url\":\"" + Updater + "\",\"hash\":\"" + hashResult2 + "\"},{\"relativeSource\":\"\",\"ID\":\"" + RelativeURL + "\",\"relativeDest\":\"" + RelativeURL + "\",\"type\":2},{\"relativeSource\":\"\",\"ID\":\"" + RelativeUpdater + "\",\"relativeDest\":\"" + RelativeUpdater + "\",\"type\":2},{\"ID\":\"" + RelativeUpdater + "\",\"type\":4}]";
         String sig = update.signString(message, "D:\\key.der");
         JSONArray tmpMes = new JSONArray(message);
         JSONObject obj = new JSONObject();
