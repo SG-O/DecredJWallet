@@ -83,7 +83,7 @@ public class Decred {
     }
 
     public boolean startDecred() throws Exception {
-        ProcessBuilder dcrdBuilder = new ProcessBuilder("dcrd", tlsOptionsDecred, netOtionsDecred, "-u", username, "-P", password);
+        ProcessBuilder dcrdBuilder = new ProcessBuilder("./dcrd", tlsOptionsDecred, netOtionsDecred, "-u", username, "-P", password);
         dcrdBuilder.redirectErrorStream(true);
         dcrd = dcrdBuilder.start();
         dcrdReader = new BufferedReader(new InputStreamReader(dcrd.getInputStream()));
@@ -133,7 +133,7 @@ public class Decred {
                 tempOptionsWallet = "--walletpass";
             }
         } else publikKey = "";
-        ProcessBuilder walletBuilder = new ProcessBuilder("dcrwallet", tlsOptionsWallet0, tlsOptionsWallet1, netOptionsWallet, "-u", username, "-P", password, tempOptionsWallet, publikKey);
+        ProcessBuilder walletBuilder = new ProcessBuilder("./dcrwallet", tlsOptionsWallet0, tlsOptionsWallet1, netOptionsWallet, "-u", username, "-P", password, tempOptionsWallet, publikKey);
         walletBuilder.redirectErrorStream(true);
         wallet = walletBuilder.start();
         walletReader = new BufferedReader(new InputStreamReader(wallet.getInputStream()));
