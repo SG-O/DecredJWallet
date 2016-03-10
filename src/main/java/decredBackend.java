@@ -14,10 +14,6 @@ import java.util.HashMap;
  * This class is used to communicate with the backend and parse its results.
  */
 public class decredBackend {
-    public static long walletPort = 9110;
-    public static long decredPort = 9109;
-    public static long testWalletPort = 19110;
-    public static long testDecredPort = 19109;
     public static boolean USE_WALLET = true;
     public static boolean USE_DECRED = false;
 
@@ -44,9 +40,9 @@ public class decredBackend {
      * @return True if we are
      */
     public boolean checkConnection() {
+        System.out.println(getPort(USE_DECRED));
         if (connection == null) return false;
-        if (!connection.goodConnection(address, getPort(USE_DECRED))) return false;
-        return connection.goodConnection(address, getPort(USE_WALLET));
+        return connection.goodConnection(address, getPort(USE_DECRED)) && connection.goodConnection(address, getPort(USE_WALLET));
     }
 
     /**
@@ -98,7 +94,7 @@ public class decredBackend {
             comunicationStrings.increaseIndex();
             if (!temp.has("result")) throw new status(status.GENERICERROR);
             try {
-                return temp.optLong("result", 0l);
+                return temp.optLong("result", 0L);
             } catch (Exception e1) {
                 throw new status(status.GENERICERROR);
             }
@@ -113,7 +109,7 @@ public class decredBackend {
             comunicationStrings.increaseIndex();
             if (!temp.has("result")) throw new status(status.GENERICERROR);
             try {
-                return temp.optLong("result", 0l);
+                return temp.optLong("result", 0L);
             } catch (Exception e1) {
                 throw new status(status.GENERICERROR);
             }
@@ -137,7 +133,7 @@ public class decredBackend {
             transaction[] tempArray = new transaction[transactions.length()];
             for (int i = 0; i < transactions.length(); i++) {
                 JSONObject currentTransaction = transactions.getJSONObject(i);
-                tempArray[i] = new transaction(currentTransaction.optString("txid"), currentTransaction.optString("blockhash"), currentTransaction.optString("address", ""), new Coin(currentTransaction.optDouble("amount")), new Coin(currentTransaction.optDouble("fee")), currentTransaction.optInt("confirmations"), currentTransaction.optString("category"), currentTransaction.optLong("time"));
+                tempArray[i] = new transaction(currentTransaction.optString("txid"), currentTransaction.optString("blockhash"), new address(currentTransaction.optString("address", ""), decredConstants.getNetConstants(set).getPubKeyHashAddrID().length), new Coin(currentTransaction.optDouble("amount")), new Coin(currentTransaction.optDouble("fee")), currentTransaction.optInt("confirmations"), currentTransaction.optString("category"), currentTransaction.optLong("time"));
             }
             return tempArray;
         } catch (Exception e){
@@ -185,9 +181,9 @@ public class decredBackend {
      * @return The transaction ID
      * @throws status If there was an error throw the status
      */
-    public String sendToAddress(String toAddress, Coin amount) throws status {
+    public String sendToAddress(address toAddress, Coin amount) throws status {
         if (set.isFairDonation()) {
-            HashMap<String, Coin> temp = new HashMap<String, Coin>();
+            HashMap<address, Coin> temp = new HashMap<address, Coin>();
             temp.put(toAddress, amount);
             return sendMany(temp);
         }
@@ -215,11 +211,11 @@ public class decredBackend {
         return temp.getString("result");
     }
 
-    public String sendMany(HashMap<String, Coin> addresses) throws status {
+    public String sendMany(HashMap<address, Coin> addresses) throws status {
         return sendMany("default", addresses);
     }
 
-    public String sendMany(String account, HashMap<String, Coin> addresses) throws status {
+    public String sendMany(String account, HashMap<address, Coin> addresses) throws status {
         if (set.isFairDonation()) {
             Coin donation;
             if (set.isFairDonationCustomAmount()) {
@@ -267,7 +263,7 @@ public class decredBackend {
      * @return An array of addresses
      * @throws status If there was an error throw the status
      */
-    public String[] getAddresses(String acont) throws status{
+    public address[] getAddresses(String acont) throws status {
         JSONObject temp = new JSONObject(connection.getRequestAnswer(address, getPort(USE_WALLET), comunicationStrings.GETADDRESSES(acont)));
         comunicationStrings.increaseIndex();
         if (!temp.has("result")) throw new status(status.GENERICERROR);
@@ -281,12 +277,11 @@ public class decredBackend {
         if ((array) == null){
             String content = temp.optString("result", "");
             if (content.equals("")) throw new status(status.NOADDRESSES);
-            String[] out = {content};
-            return out;
+            return new address[]{new address(content, decredConstants.getNetConstants(set).getPubKeyHashAddrID().length)};
         }
-        String[] out = new String[array.length()];
+        address[] out = new address[array.length()];
         for (int i = 0; i < array.length(); i++){
-            out[i] = array.getString(i);
+            out[i] = new address(array.getString(i), decredConstants.getNetConstants(set).getPubKeyHashAddrID().length);
         }
         return out;
     }
@@ -296,7 +291,7 @@ public class decredBackend {
      * @return The newly generated address
      * @throws status If there was an error throw the status
      */
-    public String getNewAddress() throws status{
+    public address getNewAddress() throws status {
         JSONObject temp = new JSONObject(connection.getRequestAnswer(address, getPort(USE_WALLET), comunicationStrings.GETNEWADDRESS));
         comunicationStrings.increaseIndex();
         if (!temp.has("result")) throw new status(status.GENERICERROR);
@@ -308,7 +303,7 @@ public class decredBackend {
         }
         String content = temp.optString("result", "");
         if (content.equals("")) throw new status(status.GENERICERROR);
-        return content;
+        return new address(content, decredConstants.getNetConstants(set).getPubKeyHashAddrID().length);
     }
 
     /**
@@ -323,7 +318,7 @@ public class decredBackend {
         if (!temp.has("result")) throw new status(status.GENERICERROR);
         if (temp.has("error")) {
             if (!temp.isNull("error")) {
-
+                throw new status(status.GENERICERROR);
             }
         }
         JSONObject info = temp.optJSONObject("result");
@@ -352,7 +347,7 @@ public class decredBackend {
             }
         }
         boolean result = temp.optBoolean("result", false);
-        if(result == false) throw new status(status.GENERICERROR);
+        if (!result) throw new status(status.GENERICERROR);
     }
 
     /**
@@ -362,14 +357,14 @@ public class decredBackend {
      */
     public long getPort(boolean wallet) {
         if (wallet && this.testnet) {
-            return testWalletPort;
+            return decredConstants.testNet.getWalletPort();
         }
         if (this.testnet) {
-            return testDecredPort;
+            return decredConstants.testNet.getDecredPort();
         }
         if (wallet) {
-            return walletPort;
+            return decredConstants.mainNet.getWalletPort();
         }
-        return decredPort;
+        return decredConstants.mainNet.getDecredPort();
     }
 }
