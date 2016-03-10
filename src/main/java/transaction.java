@@ -10,7 +10,6 @@ import java.io.*;
  * DecredUtil: Created by Joerg Bayer(admin@sg-o.de) on 31.01.2016.
  */
 public class transaction {
-    private static File setDir;
     private String ID;
     private String block;
     private address address;
@@ -35,28 +34,6 @@ public class transaction {
         } catch (Exception e) {
         }
         this.time = time;
-    }
-
-    /**
-     * Get the directory where the additional information is stored
-     *
-     * @return The directory
-     */
-    public static File getSettingsDirectory() {
-        if (setDir != null) return setDir;
-        String userHome = System.getProperty("user.home");
-        if (userHome == null) {
-            throw new IllegalStateException("user.home==null");
-        }
-        File home = new File(userHome);
-        File settingsDirectory = new File(home, ".decredjwallet");
-        if (!settingsDirectory.exists()) {
-            if (!settingsDirectory.mkdir()) {
-                throw new IllegalStateException(settingsDirectory.toString());
-            }
-        }
-        setDir = settingsDirectory;
-        return settingsDirectory;
     }
 
     public String getID() {
@@ -127,7 +104,7 @@ public class transaction {
      * @throws Exception
      */
     public void saveTransaction() throws Exception{
-        File setFile = new File(getSettingsDirectory(), ID + ".prop");
+        File setFile = new File(internal.storageTools.getSettingsDirectory(), ID + ".prop");
         if (!setFile.createNewFile()) return;
         if (!setFile.canWrite()) return;
         PrintWriter writer = new PrintWriter(setFile, "UTF-8");
@@ -140,7 +117,7 @@ public class transaction {
      * @throws Exception
      */
     public void loadTransaction() throws Exception {
-        File setFile = new File(getSettingsDirectory(), ID + ".prop");
+        File setFile = new File(internal.storageTools.getSettingsDirectory(), ID + ".prop");
         if (!setFile.exists()) return;
         if (!setFile.canRead()) return;
         BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(setFile), "UTF-8"));
