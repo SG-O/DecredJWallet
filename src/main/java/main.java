@@ -16,6 +16,18 @@ public class main {
     */
 
     public static void main(String[] args) {
+        String[] javaVersion = System.getProperty("java.version").split("\\.");
+        long javaVersionNumber = 0;
+        if (javaVersion.length >= 2) {
+            javaVersionNumber = Long.parseLong(javaVersion[0]) * 1000000;
+            javaVersionNumber += Long.parseLong(javaVersion[1]) * 1000;
+            System.out.println(javaVersionNumber);
+        }
+
+        if (javaVersionNumber < 1008000) {
+            new Error("Could not start", "Your Java version " + javaVersion + " is too old! The minimum required version is 1.8");
+        }
+
         StartUp startScreen = new StartUp();
         startScreen.setStatus("Loading settings");
         File Updater = new File("DcrdUpdater.jar"); //Is there an old updater present? If yes, delete it.
@@ -106,6 +118,7 @@ public class main {
                 new Error("Error", "Could not start Decred!"); //If we could not connect in time exit with an error message
                 startScreen.dispose();
                 new settingsUi(set);
+                System.out.println(binaries.getDcrdContent() + "\n" + binaries.getWalletContent());
                 binaries.terminate();
                 System.exit(0);
             }
@@ -128,6 +141,7 @@ public class main {
                 new Error("Error", "Could not start Decred!");
                 new settingsUi(set);
                 startScreen.dispose();
+                System.out.println(binaries.getDcrdContent() + "\n" + binaries.getWalletContent());
                 binaries.terminate();
                 System.exit(0);
             }
