@@ -137,7 +137,7 @@ public class Overview extends JFrame {
         item.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 try {
-                    new newTransaction(set.getDonationAddress(), new Coin(2), set);
+                    new newTransaction(set.getDonationAddress().toString(), new Coin(2), set);
                 } catch (Exception e1) {
                 }
             }

@@ -13,7 +13,7 @@ public class transaction {
     private static File setDir;
     private String ID;
     private String block;
-    private String address;
+    private address address;
     private Coin amount;
     private Coin fee;
     private int confirmations;
@@ -22,7 +22,7 @@ public class transaction {
     private String comment = "";
 
     //This is the internal representation of a transaction.
-    public transaction(String ID, String block, String address, Coin amount, Coin fee, int confirmations, String category, long time) {
+    public transaction(String ID, String block, address address, Coin amount, Coin fee, int confirmations, String category, long time) {
         this.ID = ID;
         this.block = block;
         this.address = address;
@@ -71,7 +71,7 @@ public class transaction {
         return amount;
     }
 
-    public String getAddress() {
+    public address getAddress() {
         return address;
     }
 

@@ -31,8 +31,8 @@ public class comunicationStrings {
         return "{\"method\":\"walletpassphrase\",\"params\":[\"" + key + "\"," + time + "],\"id\":"+index+"}";
     }
 
-    public static String SENDTO(String address, Coin amount) {
-        return "{\"method\":\"sendtoaddress\",\"params\":[\"" + address + "\"," + amount.toPointString() + "],\"id\":" + index + "}";
+    public static String SENDTO(address toAddress, Coin amount) {
+        return "{\"method\":\"sendtoaddress\",\"params\":[\"" + toAddress + "\"," + amount.toPointString() + "],\"id\":" + index + "}";
     }
 
     public static String GETADDRESSES(String account){
@@ -43,14 +43,14 @@ public class comunicationStrings {
         return "{\"method\":\"settxfee\",\"params\":[" + amount.toPointString() + "],\"id\":" + index + "}";
     }
 
-    public static String SENDMANY(String account, HashMap<String, Coin> addresses) {
+    public static String SENDMANY(String account, HashMap<address, Coin> addresses) {
         if (addresses == null) return "";
         if (addresses.isEmpty()) return "";
         JSONObject addressesOut = new JSONObject();
         String output = "{\"method\":\"sendmany\",\"params\":[\"" + account + "\",";
-        for (Map.Entry<String, Coin> entry : addresses.entrySet()) {
-            if (!addressesOut.has(entry.getKey())) {
-                addressesOut.put(entry.getKey(), entry.getValue().getAmount());
+        for (Map.Entry<address, Coin> entry : addresses.entrySet()) {
+            if (!addressesOut.has(entry.getKey().toString())) {
+                addressesOut.put(entry.getKey().toString(), entry.getValue().getAmount());
             }
         }
         output += addressesOut.toString();

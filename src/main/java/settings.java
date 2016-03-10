@@ -225,9 +225,9 @@ public class settings {
         this.customBinariesUrl = customBinariesUrl;
     }
 
-    public String getDonationAddress() {
-        if (!testnet) return "DshRV5v8XEVpozeEEaZffvtzrfJLqBnYRnX";
-        return "TskQPYijAN2MCmmeymqzpWPQXjbdty8YzJa";
+    public address getDonationAddress() {
+        if (!testnet) return new address("DshRV5v8XEVpozeEEaZffvtzrfJLqBnYRnX", 2);
+        return new address("TskQPYijAN2MCmmeymqzpWPQXjbdty8YzJa", 2);
     }
 
     /**

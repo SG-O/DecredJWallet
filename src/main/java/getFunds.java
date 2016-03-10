@@ -109,9 +109,9 @@ public class getFunds extends JDialog{
             return;
         }
         try {
-            String[] addresses = backend.getAddresses("default");
+            address[] addresses = backend.getAddresses("default");
             for (int i = 0; i < addresses.length; i++){
-                addressSelect.addItem(addresses[i]);
+                addressSelect.addItem(addresses[i].toString());
             }
         } catch (status s){
             new Error("Error", s.toString());
@@ -166,7 +166,7 @@ public class getFunds extends JDialog{
             int n = 0;
             while (exists) {
                 exists = false;
-                address = backend.getNewAddress();
+                address = backend.getNewAddress().toString();
                 for (int i = 0; i < addressSelect.getItemCount(); i++) {
                     if (address.equals(addressSelect.getItemAt(i))) {
                         exists = true;

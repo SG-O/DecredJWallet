@@ -122,20 +122,24 @@ public class newTransaction extends JDialog {
     private void onOK() {
 // add your code here
         Coin value = null;
-        HashMap<String, Coin> temp = new HashMap<String, Coin>();
+        HashMap<address, Coin> temp = new HashMap<address, Coin>();
         if (tabbs.getSelectedIndex() == 1) {
             for (int i = 0; i < advancedInputs.size(); i++) {
                 JTextField[] inputs = advancedInputs.get(i);
                 if (inputs != null) {
-                    String addr = inputs[0].getText();
-                    if (addr.equals("")) {
+                    address ad = new address(inputs[0].getText(), 2);
+                    if (ad.isEmpty()) {
                         new Error("Error", "No address entered for target " + (i + 1) + ".");
+                        return;
+                    }
+                    if (!ad.check()) {
+                        new Error("Error", "Invalid address: " + ad);
                         return;
                     }
                     try {
                         value = new Coin(inputs[1].getText());
                     } catch (Exception e) {
-                        new Error("Error", "Value for " + addr + " can not be read.");
+                        new Error("Error", "Value for " + ad + " can not be read.");
                         return;
                     }
                     if (value.getFixedPointAmount() > 0) {
@@ -148,7 +152,7 @@ public class newTransaction extends JDialog {
                                 value = tmpcoin;
                             }
                         }
-                        temp.put(addr, value);
+                        temp.put(ad, value);
                     }
                 }
             }
@@ -169,6 +173,7 @@ public class newTransaction extends JDialog {
             }
             if (value.getFixedPointAmount() <= 0) {
                 new Error("Error", "Please enter a number that is greater than zero");
+                return;
             }
         }
         decredBackend backend = settings.getBackend();
@@ -196,7 +201,16 @@ public class newTransaction extends JDialog {
             if (tabbs.getSelectedIndex() == 1) {
                 ID = backend.sendMany(temp);
             } else if (value != null) {
-                ID = backend.sendToAddress(addr.getText(), value);
+                address parsedAddress = new address(addr.getText(), 2);
+                if (parsedAddress.isEmpty()) {
+                    new Error("Error", "No address entered.");
+                    return;
+                }
+                if (!parsedAddress.check()) {
+                    new Error("Error", "Invalid address: " + parsedAddress);
+                    return;
+                }
+                ID = backend.sendToAddress(parsedAddress, value);
             }
             new SelectableMessage("Success", "TXID:" + ID);
         } catch (status s){

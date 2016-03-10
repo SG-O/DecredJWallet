@@ -94,7 +94,7 @@ public class TransactionGui extends JDialog{
     private void setData(){
         this.id.setText(t.getID());
         this.block.setText(t.getBlock());
-        this.address.setText(t.getAddress());
+        this.address.setText(t.getAddress().toString());
         this.ammount.setText(t.getAmount().toString());
         this.fee.setText(t.getFee().toString());
         this.confirmations.setText(String.valueOf(t.getConfirmations()));
