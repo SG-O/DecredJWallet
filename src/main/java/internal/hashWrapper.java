@@ -1,6 +1,7 @@
 package internal;
 
-import org.bouncycastle.crypto.digests.RIPEMD160Digest;
+
+import fr.cryptohash.JCAProvider;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -11,18 +12,22 @@ import java.security.NoSuchAlgorithmException;
 public class hashWrapper {
     public static byte[] ripemd160(byte[] bytes) {
         if (bytes == null) return null;
-        RIPEMD160Digest md = new RIPEMD160Digest();
-        md.update(bytes, 0, bytes.length);
-        byte[] output = new byte[md.getDigestSize()];
-        md.doFinal(output, 0);
-        return output;
+        MessageDigest md = null;
+        try {
+            md = MessageDigest.getInstance("RIPEMD160", new JCAProvider());
+        } catch (NoSuchAlgorithmException e) {
+            return null;
+        }
+        md.update(bytes);
+        return md.digest();
+
     }
 
     public static byte[] hashSha256(byte[] bytes) {
         if (bytes == null) return null;
         MessageDigest md;
         try {
-            md = MessageDigest.getInstance("SHA-256");
+            md = MessageDigest.getInstance("BLAKE256", new JCAProvider());
         } catch (NoSuchAlgorithmException e) {
             return null;
         }
