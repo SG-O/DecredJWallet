@@ -28,6 +28,7 @@ public class Overview extends JFrame {
     private JLabel balance;
     private JLabel statusString;
     private JLabel currentBlock;
+    private JButton addressBookButton;
     private JMenuBar menu;
     private JTable table;
     private JScrollPane tableScroll;
@@ -70,6 +71,14 @@ public class Overview extends JFrame {
         getFunds.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 new getFunds();
+            }
+        });
+        addressBookButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                try {
+                    new AddressBookGui(new addressBook(set), set, true);
+                } catch (Exception e1) {
+                }
             }
         });
 
@@ -137,7 +146,7 @@ public class Overview extends JFrame {
         item.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 try {
-                    new newTransaction(set.getDonationAddress().toString(), new Coin(2), set);
+                    new newTransaction(set.getDonationAddress(), new Coin(2), set);
                 } catch (Exception e1) {
                 }
             }
