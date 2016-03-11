@@ -37,10 +37,10 @@ public class newTransaction extends JDialog {
     private settings set;
 
     public newTransaction(settings set) {
-        this("", new Coin(), set);
+        this(null, new Coin(), set);
     }
 
-    public newTransaction(String to, Coin amount, settings set) {
+    public newTransaction(address to, Coin amount, settings set) {
         setContentPane(contentPane);
         setTitle("New Transaction");
         setModal(true);
@@ -49,13 +49,12 @@ public class newTransaction extends JDialog {
         this.set = set;
         getRootPane().setDefaultButton(buttonOK);
 
-        if (to == null) {
-            to = "";
+        if (to != null) {
+            addr.setText(to.toString());
         }
         if (amount == null) {
             amount = new Coin();
         }
-        addr.setText(to);
         value.setText(amount.toString());
 
         try {

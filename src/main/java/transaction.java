@@ -127,5 +127,6 @@ public class transaction {
             prop.append(line);
         }
         this.comment = prop.toString();
+        br.close();
     }
 }
