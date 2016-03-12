@@ -354,8 +354,4 @@ public class newTransaction extends JDialog {
         }
 
     }
-
-    private void createUIComponents() {
-        // TODO: place custom component creation code here
-    }
 }
