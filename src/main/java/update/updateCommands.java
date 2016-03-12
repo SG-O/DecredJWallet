@@ -1,5 +1,6 @@
 package update;
 
+import org.apache.commons.io.FileUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import sun.misc.BASE64Decoder;
@@ -60,9 +61,8 @@ public class updateCommands {
 
     public void cleanUp() {
         try {
-            temp.delete();
+            FileUtils.deleteDirectory(temp);
         } catch (Exception e) {
         }
-
     }
 }
