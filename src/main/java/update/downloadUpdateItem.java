@@ -32,6 +32,27 @@ public class downloadUpdateItem extends updateItem {
         this.hash = hash;
     }
 
+    public static String hash(File file) {
+        try {
+            MessageDigest md = MessageDigest.getInstance("SHA-256");
+            FileInputStream fis = new FileInputStream(file);
+
+            byte[] dataBytes = new byte[1024];
+
+            int nread = 0;
+            while ((nread = fis.read(dataBytes)) != -1) {
+                md.update(dataBytes, 0, nread);
+            }
+            byte[] mdbytes = md.digest();
+            BASE64Encoder encoder = new BASE64Encoder();
+            System.out.println(encoder.encode(mdbytes));
+            fis.close();
+            return encoder.encode(mdbytes);
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
     @Override
     public boolean execute() {
         if (tempdir == null) return false;
@@ -42,6 +63,7 @@ public class downloadUpdateItem extends updateItem {
             ReadableByteChannel rbc = Channels.newChannel(website.openStream());
             FileOutputStream fos = new FileOutputStream(new File(tempdir, super.getID()));
             fos.getChannel().transferFrom(rbc, 0, Long.MAX_VALUE);
+            fos.close();
         } catch (Exception e){
             return false;
         }
@@ -54,26 +76,5 @@ public class downloadUpdateItem extends updateItem {
         if (hashResult == null) return false;
         if (!hashResult.equals(hash)) return false;
         return super.check();
-    }
-
-    public static String hash(File file) {
-        try {
-            MessageDigest md = MessageDigest.getInstance("SHA-256");
-            FileInputStream fis = new FileInputStream(file);
-
-            byte[] dataBytes = new byte[1024];
-
-            int nread = 0;
-            while ((nread = fis.read(dataBytes)) != -1) {
-                md.update(dataBytes, 0, nread);
-            }
-            ;
-            byte[] mdbytes = md.digest();
-            BASE64Encoder encoder = new BASE64Encoder();
-            System.out.println(encoder.encode(mdbytes));
-            return encoder.encode(mdbytes);
-        } catch (Exception e){
-            return null;
-        }
     }
 }
