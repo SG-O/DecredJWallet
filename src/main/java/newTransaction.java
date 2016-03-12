@@ -28,6 +28,8 @@ public class newTransaction extends JDialog {
     private JPanel advancedTabContent;
     private JButton addButton;
     private JLabel donationMessage;
+    private JButton addressBookButton;
+    private JButton addressBook2;
     private JPanel aTab;
     private JPanel advancedTab;
 
@@ -35,18 +37,23 @@ public class newTransaction extends JDialog {
 
     private Coin baseUnit = new Coin();
     private settings set;
+    private addressBook book;
 
     public newTransaction(settings set) {
         this(null, new Coin(), set);
     }
 
-    public newTransaction(address to, Coin amount, settings set) {
+    public newTransaction(address to, Coin amount, final settings set) {
         setContentPane(contentPane);
         setTitle("New Transaction");
         setModal(true);
         setMinimumSize(new Dimension(400, 400));
         setSize(400, 400);
         this.set = set;
+        try {
+            book = new addressBook(set);
+        } catch (Exception e) {
+        }
         getRootPane().setDefaultButton(buttonOK);
 
         if (to != null) {
@@ -71,6 +78,24 @@ public class newTransaction extends JDialog {
         buttonCancel.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 onCancel();
+            }
+        });
+
+        addressBookButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                AddressBookGui adrGui1 = new AddressBookGui(book, set, false);
+                if (adrGui1.getSelected() != null) {
+                    addr.setText(adrGui1.getSelected().getAdr().toString());
+                }
+            }
+        });
+
+        addressBook2.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                AddressBookGui adrGui2 = new AddressBookGui(book, set, false);
+                if (adrGui2.getSelected() != null) {
+                    createEntry(adrGui2.getSelected().getAdr());
+                }
             }
         });
 
@@ -251,6 +276,10 @@ public class newTransaction extends JDialog {
     }
 
     private void createEntry() {
+        createEntry(null);
+    }
+
+    private void createEntry(address adr) {
         JTextField[] tempFields = new JTextField[2];
         Dimension sizeLabel = new Dimension(60, 16);
         final JPanel subItem0 = new JPanel();
@@ -260,6 +289,9 @@ public class newTransaction extends JDialog {
         infoText.setPreferredSize(sizeLabel);
         infoText.setMaximumSize(sizeLabel);
         JTextField input = new JTextField();
+        if (adr != null) {
+            input.setText(adr.toString());
+        }
         tempFields[0] = input;
         subItem0.add(infoText);
         subItem0.add(input);
@@ -321,5 +353,9 @@ public class newTransaction extends JDialog {
         } catch (Exception e) {
         }
 
+    }
+
+    private void createUIComponents() {
+        // TODO: place custom component creation code here
     }
 }
