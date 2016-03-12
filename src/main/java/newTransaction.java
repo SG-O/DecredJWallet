@@ -47,8 +47,8 @@ public class newTransaction extends JDialog {
         setContentPane(contentPane);
         setTitle("New Transaction");
         setModal(true);
-        setMinimumSize(new Dimension(400, 400));
-        setSize(400, 400);
+        setMinimumSize(new Dimension(500, 400));
+        setSize(500, 400);
         this.set = set;
         try {
             book = new addressBook(set);

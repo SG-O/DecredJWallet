@@ -47,8 +47,8 @@ public class settingsUi extends JDialog{
 
         this.set = set;
         contentPane.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
-        setMinimumSize(new Dimension(500, 400));
-        setSize(500, 400);
+        setMinimumSize(new Dimension(700, 400));
+        setSize(700, 400);
         getRootPane().setDefaultButton(ok);
 
         ok.addActionListener(new ActionListener() {
@@ -91,6 +91,7 @@ public class settingsUi extends JDialog{
             }
         }, KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
         setLocationRelativeTo(null);
+        pack();
         setSettings();
         setVisible(true);
     }

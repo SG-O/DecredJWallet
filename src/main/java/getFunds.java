@@ -32,8 +32,8 @@ public class getFunds extends JDialog{
         setContentPane(contentPane);
         setTitle("Get Payed");
         setModal(true);
-        setMinimumSize(new Dimension(620, 410));
-        setSize(620,410);
+        setMinimumSize(new Dimension(750, 410));
+        setSize(750, 410);
         getRootPane().setDefaultButton(buttonOK);
 
         try {
