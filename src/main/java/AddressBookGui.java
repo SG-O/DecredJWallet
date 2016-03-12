@@ -10,7 +10,6 @@ import java.io.IOException;
  */
 public class AddressBookGui extends JDialog {
     private JButton cancelButton;
-    private JButton OKButton;
     private JTextField commentField;
     private JTextField addressField;
     private JTextField nameField;
@@ -18,6 +17,8 @@ public class AddressBookGui extends JDialog {
     private JPanel contentPane;
     private JPanel book;
     private JButton removeButton;
+    private JButton sendToButton;
+    private JCheckBox saveCheckBox;
     private JTable table;
     private JScrollPane tableScroll;
     private TableModel tableModel;
@@ -33,6 +34,10 @@ public class AddressBookGui extends JDialog {
         setTitle("Address Book");
         setAlwaysOnTop(true);
         setModal(true);
+
+        if (!doTransaction) {
+            sendToButton.setVisible(false);
+        }
 
         this.adrBook = adrBook;
 
@@ -51,12 +56,6 @@ public class AddressBookGui extends JDialog {
         setSize(550, 400);
         getRootPane().setDefaultButton(cancelButton);
 
-        OKButton.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                onOK();
-            }
-        });
-
         cancelButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 onCancel();
@@ -72,6 +71,12 @@ public class AddressBookGui extends JDialog {
         removeButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 removeAddress();
+            }
+        });
+
+        sendToButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                sendTo();
             }
         });
 
@@ -114,6 +119,11 @@ public class AddressBookGui extends JDialog {
         ((addressBookTableModel) tableModel).changeData(adrBook);
     }
 
+    public addressBookEntry getSelected() {
+        if (table.getSelectedRow() < 0) return null;
+        return ((addressBookTableModel) tableModel).getValueAtRow(table.getSelectedRow());
+    }
+
     private void addAddress() {
         if (addressField.getText().trim().length() < (decredConstants.getNetConstants(set).getPubKeyHashAddrID().length + 5)) {
             new Error("Error", "Address is too short.");
@@ -133,12 +143,14 @@ public class AddressBookGui extends JDialog {
     }
 
     private void onCancel() {
+        if (saveCheckBox.isSelected()) {
+            adrBook.saveAddressBook();
+        }
         dispose();
     }
 
-    private void onOK() {
-        adrBook.saveAddressBook();
-        dispose();
+    private void sendTo() {
+        onCancel();
         if (doTransaction && (table.getSelectedRow() >= 0)) {
             new newTransaction(((addressBookTableModel) tableModel).getValueAtRow(table.getSelectedRow()).getAdr(), new Coin(), set);
         }

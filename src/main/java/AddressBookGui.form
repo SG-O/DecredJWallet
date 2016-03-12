@@ -3,7 +3,7 @@
   <grid id="27dc6" binding="contentPane" layout-manager="GridLayoutManager" row-count="4" column-count="7" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
     <margin top="0" left="0" bottom="0" right="0"/>
     <constraints>
-      <xy x="20" y="20" width="486" height="465"/>
+      <xy x="20" y="20" width="524" height="465"/>
     </constraints>
     <properties/>
     <border type="none"/>
@@ -19,14 +19,6 @@
       <component id="f0a53" class="javax.swing.JButton" binding="cancelButton" default-binding="true">
         <constraints>
           <grid row="3" column="6" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
-        </constraints>
-        <properties>
-          <text value="Cancel"/>
-        </properties>
-      </component>
-      <component id="97235" class="javax.swing.JButton" binding="OKButton" default-binding="true">
-        <constraints>
-          <grid row="3" column="5" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
         </constraints>
         <properties>
           <text value="OK"/>
@@ -107,6 +99,23 @@
         </constraints>
         <properties>
           <text value="Remove"/>
+        </properties>
+      </component>
+      <component id="7a4dd" class="javax.swing.JCheckBox" binding="saveCheckBox" default-binding="true">
+        <constraints>
+          <grid row="2" column="6" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties>
+          <selected value="true"/>
+          <text value="Save"/>
+        </properties>
+      </component>
+      <component id="3904a" class="javax.swing.JButton" binding="sendToButton" default-binding="true">
+        <constraints>
+          <grid row="3" column="5" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties>
+          <text value="Send to"/>
         </properties>
       </component>
     </children>
