@@ -36,7 +36,7 @@ public class addressBook {
         if (!content.has("entries")) return;
         JSONArray entries = content.getJSONArray("entries");
         for (int i = 0; i < entries.length(); i++) {
-            addressBookEntry entry = new addressBookEntry(entries.getJSONObject(i), set);
+            addressBookEntry entry = new addressBookEntry(entries.optJSONObject(i), set);
             this.entries.put(entry.getName(), entry);
         }
         if (!content.has("lastUsed")) return;
@@ -47,25 +47,25 @@ public class addressBook {
         }
     }
 
-    public addressBookEntry[] getLastUsed() {
+    public address[] getLastUsed() {
         int i = 0;
         while (i < 3) {
             if (lastUsed[i] == null) break;
             i++;
         }
-        addressBookEntry[] temp = new addressBookEntry[i];
+        address[] temp = new address[i];
         for (i = 0; i < temp.length; i++) {
-            temp[i] = entries.getOrDefault(lastUsed[i], null);
+            temp[i] = new address(lastUsed[i], decredConstants.getNetConstants(set).getPubKeyHashAddrID().length);
         }
         return temp;
     }
 
-    public void setLastUsed(addressBookEntry entry) {
+    public void setLastUsed(address entry) {
         for (int i = 0; i < lastUsed.length - 1; i++) {
             if (lastUsed[i] == null) break;
             lastUsed[i + 1] = lastUsed[i];
         }
-        lastUsed[0] = entry.getName();
+        lastUsed[0] = entry.toString();
     }
 
     public addressBookEntry[] getAlphabetical() {
@@ -112,7 +112,7 @@ public class addressBook {
         JSONArray lastUsed = new JSONArray();
         for (int i = 0; i < this.lastUsed.length; i++) {
             if (this.lastUsed[i] == null) break;
-            entries.put(this.lastUsed[i]);
+            lastUsed.put(this.lastUsed[i]);
         }
         JSONObject content = new JSONObject();
         content.put("entries", entries);
