@@ -59,6 +59,8 @@ public class Decred {
     }
 
     public int checkVersion() throws Exception {
+        setPermissions("dcrd");
+        setPermissions("dcrd.exe");
         ProcessBuilder dcrdBuilder = new ProcessBuilder("dcrd", "-V");
         dcrdBuilder.redirectErrorStream(true);
         dcrd = dcrdBuilder.start();
@@ -83,6 +85,8 @@ public class Decred {
     }
 
     public boolean startDecred() throws Exception {
+        setPermissions("dcrd");
+        setPermissions("dcrd.exe");
         ProcessBuilder dcrdBuilder = new ProcessBuilder("./dcrd", tlsOptionsDecred, netOtionsDecred, "-u", username, "-P", password);
         dcrdBuilder.redirectErrorStream(true);
         dcrd = dcrdBuilder.start();
@@ -133,6 +137,8 @@ public class Decred {
                 tempOptionsWallet = "--walletpass";
             }
         } else publikKey = "";
+        setPermissions("dcrwallet");
+        setPermissions("dcrwallet.exe");
         ProcessBuilder walletBuilder = new ProcessBuilder("./dcrwallet", tlsOptionsWallet0, tlsOptionsWallet1, netOptionsWallet, "-u", username, "-P", password, tempOptionsWallet, publikKey);
         walletBuilder.redirectErrorStream(true);
         wallet = walletBuilder.start();
@@ -255,5 +261,12 @@ public class Decred {
             while (dcrd.isAlive()) {
             }
         }
+    }
+
+    public void setPermissions(String fileName) {
+        File executable = new File(fileName);
+        if (!executable.exists()) return;
+        executable.setExecutable(true, false);
+        executable.setReadable(true, false);
     }
 }
