@@ -115,7 +115,7 @@ public class main {
             } catch (InterruptedException ignored) {
             }
             if (i > 30){
-                new Error("Error", "Could not start Decred!"); //If we could not connect in time exit with an error message
+                new Error("Error", "Could not connect to dcrwallet!"); //If we could not connect in time exit with an error message
                 startScreen.dispose();
                 new settingsUi(set);
                 System.out.println(binaries.getDcrdContent() + "\n" + binaries.getWalletContent());
@@ -138,7 +138,7 @@ public class main {
             } catch (InterruptedException ignored) {
             }
             if (i > 100){
-                new Error("Error", "Could not start Decred!");
+                new Error("Error", "Could not load wallet data!");
                 new settingsUi(set);
                 startScreen.dispose();
                 System.out.println(binaries.getDcrdContent() + "\n" + binaries.getWalletContent());
