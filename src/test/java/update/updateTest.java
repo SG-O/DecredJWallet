@@ -26,23 +26,24 @@ import static org.junit.Assert.assertTrue;
  */
 public class updateTest {
 
-    public static void buildOtherToolsUpdate(long version, String type) throws Exception {
+    public static void buildOtherToolsUpdate(long version, String type, String dateSufix) throws Exception {
         String URL;
         String Relative;
+        String versionString = buildVerison(version);
         if (type.equals("l64")) {
-            URL = "https://github.com/decred/decred-release/releases/download/v0.0.7/linux-amd64-20160309-01.tar.gz";
+            URL = "https://github.com/decred/decred-release/releases/download/v" + versionString + "/linux-amd64-" + dateSufix + ".tar.gz";
             Relative = "linux-amd64";
         } else if (type.equals("l32")) {
-            URL = "https://github.com/decred/decred-release/releases/download/v0.0.7/linux-386-20160309-01.tar.gz";
+            URL = "https://github.com/decred/decred-release/releases/download/v" + versionString + "/linux-386-" + dateSufix + ".tar.gz";
             Relative = "linux-386";
         } else if (type.equals("larm")) {
-            URL = "https://github.com/decred/decred-release/releases/download/v0.0.7/linux-arm-20160309-01.tar.gz";
+            URL = "https://github.com/decred/decred-release/releases/download/v" + versionString + "/linux-arm-" + dateSufix + ".tar.gz";
             Relative = "linux-arm";
         } else if (type.equals("d64")) {
-            URL = "https://github.com/decred/decred-release/releases/download/v0.0.7/darwin-amd64-20160309-01.tar.gz";
+            URL = "https://github.com/decred/decred-release/releases/download/v" + versionString + "/darwin-amd64-" + dateSufix + ".tar.gz";
             Relative = "darwin-amd64";
         } else if (type.equals("d32")) {
-            URL = "https://github.com/decred/decred-release/releases/download/v0.0.7/darwin-386-20160309-01.tar.gz";
+            URL = "https://github.com/decred/decred-release/releases/download/v" + versionString + "/darwin-386-" + dateSufix + ".tar.gz";
             Relative = "darwin-386";
         } else return;
         File temp = File.createTempFile("dcrd", Long.toString(System.nanoTime()));
@@ -72,14 +73,15 @@ public class updateTest {
         writeFile(type, version, obj);
     }
 
-    public static void buildWindowsToolsUpdate(long version, String type) throws Exception {
+    public static void buildWindowsToolsUpdate(long version, String type, String dateSufix) throws Exception {
         String URL;
         String Relative;
+        String versionString = buildVerison(version);
         if (type.equals("w64")) {
-            URL = "https://github.com/decred/decred-release/releases/download/v0.0.7/windows-amd64-20160309-01.zip";
+            URL = "https://github.com/decred/decred-release/releases/download/v" + versionString + "/windows-amd64-" + dateSufix + ".zip";
             Relative = "windows-amd64";
         } else if (type.equals("w32")) {
-            URL = "https://github.com/decred/decred-release/releases/download/v0.0.7/windows-386-20160309-01.zip";
+            URL = "https://github.com/decred/decred-release/releases/download/v" + versionString + "/windows-386-" + dateSufix + ".zip";
             Relative = "windows-386";
         } else return;
         File temp = File.createTempFile("dcrd", Long.toString(System.nanoTime()));
@@ -133,12 +135,12 @@ public class updateTest {
         if (type.endsWith("arm")) {
             fileName = "armdecrd" + version + ".json";
         }
-        File updateFile = new File(internal.storageTools.getSettingsDirectory(), folderName + File.separator + fileName);
-        updateFile.getParentFile().mkdir();
+        File updateFile = new File(internal.storageTools.getSettingsDirectory(), "updates" + File.separator + "update" + buildVerison(version) + File.separator + folderName + File.separator + fileName);
+        updateFile.getParentFile().mkdirs();
         PrintWriter writer = new PrintWriter(updateFile, "UTF-8");
         writer.print(obj.toString());
         writer.close();
-        File updateInfoFile = new File(internal.storageTools.getSettingsDirectory(), "dcrdjguitools" + type);
+        File updateInfoFile = new File(internal.storageTools.getSettingsDirectory(), "updates" + File.separator + "update" + buildVerison(version) + File.separator + "dcrdjguitools" + type);
         writer = new PrintWriter(updateInfoFile, "UTF-8");
         writer.print("{\"Server\":\"http://sg-o.de/upd/" + folderName + "/" + fileName + "\",\"Version\":" + version + ",\"MinimalSoftware\":7}");
         writer.close();
@@ -146,15 +148,50 @@ public class updateTest {
         System.out.println(obj);
     }
 
+    public static String buildVerison(long version) {
+        int minorLength = 3;
+        int patchLenght = 4;
+        StringBuilder ver = new StringBuilder(String.valueOf(version));
+        while (ver.length() <= (minorLength + patchLenght)) {
+            ver.insert(0, "0");
+        }
+        ver.insert(ver.length() - patchLenght, '.');
+        ver.insert(ver.length() - (patchLenght + 1 + patchLenght), '.');
+        boolean startRemoving = false;
+        for (int i = 0; i < ver.length(); i++) {
+            if (ver.charAt(i) != '0') {
+                startRemoving = false;
+            }
+            if (ver.charAt(i) == '.') {
+                startRemoving = true;
+            }
+            if (startRemoving && ver.charAt(i) == '0') {
+                if (i + 1 < ver.length()) {
+                    if (ver.charAt(i + 1) != '.') {
+                        ver.deleteCharAt(i);
+                        i--;
+                    }
+                }
+            }
+        }
+        return ver.toString();
+    }
+
+    @Test
+    public void testBuildVersion() throws Exception {
+    }
+
     @Test
     public void buildToolUpdates() throws Exception {
-        buildOtherToolsUpdate(7, "l32");
-        buildOtherToolsUpdate(7, "l64");
-        buildOtherToolsUpdate(7, "larm");
-        buildOtherToolsUpdate(7, "d32");
-        buildOtherToolsUpdate(7, "d64");
-        buildWindowsToolsUpdate(7, "w32");
-        buildWindowsToolsUpdate(7, "w64");
+        long version = 8;
+        String dateSufix = "20160318-01";
+        buildOtherToolsUpdate(version, "l32", dateSufix);
+        buildOtherToolsUpdate(version, "l64", dateSufix);
+        buildOtherToolsUpdate(version, "larm", dateSufix);
+        buildOtherToolsUpdate(version, "d32", dateSufix);
+        buildOtherToolsUpdate(version, "d64", dateSufix);
+        buildWindowsToolsUpdate(version, "w32", dateSufix);
+        buildWindowsToolsUpdate(version, "w64", dateSufix);
     }
 
     @Test
